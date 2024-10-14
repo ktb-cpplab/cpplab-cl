@@ -24,6 +24,9 @@ jobs:
               "description": "${{ github.event.issue.body }}",  # GitHub 이슈 본문 사용
               "issuetype": {
                 "name": "Bug"  # 이슈 타입을 고정 또는 변경 가능
+              },
+              "priority": {
+                "name": "High"  # 우선순위 설정 (e.g., Highest, High, Medium, Low, Lowest)
               }
             }
           }' -H "Content-Type: application/json" \
