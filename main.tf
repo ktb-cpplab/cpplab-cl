@@ -89,3 +89,44 @@ module "frontend_instance" {
   instance_name     = "Frontend"
   tags             = merge(var.tags, { Name = "Frontend" })
 }
+
+module "alb" {
+  source            = "./modules/alb"
+  lb_name           = "app-lb"
+  internal          = false
+  security_group_ids = [aws_security_group.main.id]
+  subnet_ids        = module.vpc.public_subnet_ids
+  vpc_id            = module.vpc.vpc_id
+}
+
+module "auto_scaling_be" {
+  source                     = "./modules/auto-scaling"
+  name_prefix                = "be"
+  instance_ami               = var.instance_ami
+  instance_type              = var.instance_type
+  associate_public_ip_address = false
+  security_group_ids         = [aws_security_group.main.id]
+  subnet_ids                 = module.vpc.private_subnet_ids
+  key_name                   = var.key_name
+  desired_capacity           = 1
+  max_size                   = 2
+  min_size                   = 1
+  target_group_arns          = [module.alb.be_target_group_arn]
+  tag_name                   = "be-instance"
+}
+
+module "auto_scaling_fe" {
+  source                     = "./modules/auto-scaling"
+  name_prefix                = "fe"
+  instance_ami               = var.instance_ami
+  instance_type              = var.instance_type
+  associate_public_ip_address = true
+  security_group_ids         = [aws_security_group.main.id]
+  subnet_ids                 = module.vpc.public_subnet_ids
+  key_name                   = var.key_name
+  desired_capacity           = 1
+  max_size                   = 2
+  min_size                   = 1
+  target_group_arns          = [module.alb.fe_target_group_arn]
+  tag_name                   = "fe-instance"
+}
