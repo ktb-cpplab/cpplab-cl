@@ -1,12 +1,8 @@
 name: Create Jira Issue
 
 on:
-  workflow_dispatch:
-    inputs:
-      issuetype:
-        description: 'Type of the Jira issue (e.g., Task, Bug, Story)'
-        required: true
-        default: 'Task'  # 기본값 설정
+  issues:
+    types: [opened]  # GitHub에서 이슈가 생성될 때 트리거
 
 jobs:
   create_jira_issue:
@@ -22,12 +18,12 @@ jobs:
           --data '{
             "fields": {
               "project": {
-                "key": "CLAB"
+                "key": "YOUR_PROJECT_KEY"
               },
-              "summary": "Issue from GitHub Actions",
-              "description": "This issue was automatically created by GitHub Actions.",
+              "summary": "${{ github.event.issue.title }}",  # GitHub 이슈 제목 사용
+              "description": "${{ github.event.issue.body }}",  # GitHub 이슈 본문 사용
               "issuetype": {
-                "name": "${{ github.event.inputs.issuetype }}"
+                "name": "Bug"  # 이슈 타입을 고정 또는 변경 가능
               }
             }
           }' -H "Content-Type: application/json" \
