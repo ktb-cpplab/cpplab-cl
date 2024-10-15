@@ -65,30 +65,30 @@ module "jenkins_instance" {
   tags             = merge(var.tags, { Name = "Jenkins" })
 }
 
-module "backend_instance" {
-  source = "./modules/ec2-instance"
+# module "backend_instance" {
+#   source = "./modules/ec2-instance"
 
-  ami              = var.instance_ami
-  instance_type    = var.instance_type
-  key_name         = var.key_name
-  security_group_id = aws_security_group.main.id
-  subnet_id        = module.vpc.private_subnet_ids[0]
-  instance_name     = "Backend"
-  iam_instance_profile = module.ssm_iam_role.instance_profile_name
-  tags             = merge(var.tags, { Name = "Backend" })
-}
+#   ami              = var.instance_ami
+#   instance_type    = var.instance_type
+#   key_name         = var.key_name
+#   security_group_id = aws_security_group.main.id
+#   subnet_id        = module.vpc.private_subnet_ids[0]
+#   instance_name     = "Backend"
+#   iam_instance_profile = module.ssm_iam_role.instance_profile_name
+#   tags             = merge(var.tags, { Name = "Backend" })
+# }
 
-module "frontend_instance" {
-  source = "./modules/ec2-instance"
+# module "frontend_instance" {
+#   source = "./modules/ec2-instance"
 
-  ami              = var.instance_ami
-  instance_type    = var.instance_type
-  key_name         = var.key_name
-  security_group_id = aws_security_group.main.id
-  subnet_id        = module.vpc.public_subnet_ids[0]
-  instance_name     = "Frontend"
-  tags             = merge(var.tags, { Name = "Frontend" })
-}
+#   ami              = var.instance_ami
+#   instance_type    = var.instance_type
+#   key_name         = var.key_name
+#   security_group_id = aws_security_group.main.id
+#   subnet_id        = module.vpc.public_subnet_ids[0]
+#   instance_name     = "Frontend"
+#   tags             = merge(var.tags, { Name = "Frontend" })
+# }
 
 module "alb" {
   source            = "./modules/alb"
@@ -106,7 +106,7 @@ module "auto_scaling_be" {
   instance_type              = var.instance_type
   associate_public_ip_address = false
   security_group_ids         = [aws_security_group.main.id]
-  subnet_ids                 = module.vpc.private_subnet_ids
+  subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
   key_name                   = var.key_name
   desired_capacity           = 1
   max_size                   = 2
@@ -122,7 +122,7 @@ module "auto_scaling_fe" {
   instance_type              = var.instance_type
   associate_public_ip_address = true
   security_group_ids         = [aws_security_group.main.id]
-  subnet_ids                 = module.vpc.public_subnet_ids
+  subnet_ids                 = [module.vpc.public_subnet_ids[0], module.vpc.public_subnet_ids[1]]
   key_name                   = var.key_name
   desired_capacity           = 1
   max_size                   = 2
