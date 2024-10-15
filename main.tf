@@ -101,7 +101,7 @@ module "alb" {
 
 module "auto_scaling_be" {
   source                     = "./modules/auto-scaling"
-  name_prefix                = "be"
+  name_prefix                = "launch-template-be"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
   associate_public_ip_address = false
@@ -117,7 +117,7 @@ module "auto_scaling_be" {
 
 module "auto_scaling_fe" {
   source                     = "./modules/auto-scaling"
-  name_prefix                = "fe"
+  name_prefix                = "launch-template-"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
   associate_public_ip_address = true
