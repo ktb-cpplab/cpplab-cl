@@ -39,3 +39,8 @@ variable "key_name" {
   description = "Key pair name for SSH access to the NAT instance"
   type        = string
 }
+
+variable "nat_security_group_id" {
+  description = "NAT 인스턴스에 적용할 보안 그룹 ID"
+  type        = string
+}
