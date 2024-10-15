@@ -22,3 +22,16 @@ variable "vpc_id" {
   description = "ID of the VPC"
   type        = string
 }
+
+variable "frontend_host" {
+  description = "Host header for frontend routing"
+  type        = string
+  default     = "frontend.example.com"
+}
+
+variable "backend_host" {
+  description = "Host header for backend routing"
+  type        = string
+  default     = "backend.example.com"
+}
+
