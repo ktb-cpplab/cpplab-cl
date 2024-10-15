@@ -90,13 +90,13 @@ module "jenkins_instance" {
 #   tags             = merge(var.tags, { Name = "Frontend" })
 # }
 
-resource "aws_eip" "frontend_eip" {
-  vpc      = true
-  instance = module.frontend_instance.id  # 프론트엔드 인스턴스에 연결
-  tags = {
-    Name = "Frontend EIP"
-  }
-}
+# resource "aws_eip" "frontend_eip" {
+#   vpc      = true
+#   instance = module.frontend_instance.id  # 프론트엔드 인스턴스에 연결
+#   tags = {
+#     Name = "Frontend EIP"
+#   }
+# }
 
 module "alb" {
   source            = "./modules/alb"
