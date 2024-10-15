@@ -120,6 +120,7 @@ module "auto_scaling_be" {
   max_size                   = 2
   min_size                   = 1
   target_group_arns          = [module.alb.be_target_group_arn]
+  iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "be-instance"
 }
 

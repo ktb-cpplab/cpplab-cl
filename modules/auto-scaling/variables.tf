@@ -57,3 +57,9 @@ variable "tag_name" {
   description = "Name tag for instances"
   type        = string
 }
+
+variable "iam_instance_profile" {
+  description = "IAM Instance Profile for EC2 instances (optional)"
+  type        = string
+  default     = null  # 기본값을 null로 설정
+}

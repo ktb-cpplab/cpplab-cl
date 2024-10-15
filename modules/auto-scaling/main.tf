@@ -9,6 +9,14 @@ resource "aws_launch_template" "this" {
   }
 
   key_name = var.key_name
+  
+  # 조건부로 IAM 인스턴스 프로파일 추가
+  dynamic "iam_instance_profile" {
+    for_each = var.iam_instance_profile != null ? [1] : []
+    content {
+      name = var.iam_instance_profile
+    }
+  }
 }
 
 resource "aws_autoscaling_group" "this" {
