@@ -22,6 +22,14 @@ resource "aws_lb_target_group" "fe" {
   target_type = "instance"
 }
 
+resource "aws_lb_target_group" "ai" {
+  name       = "ai-target-group"
+  port       = 80  # AI 서비스에서 사용하는 포트. 필요에 따라 조정해야 합니다.
+  protocol   = "HTTP"  # AI 서비스에서 사용하는 프로토콜
+  vpc_id     = var.vpc_id
+  target_type = "instance"  # 기본 설정으로, AI 서비스가 EC2 인스턴스로 호스팅될 경우
+}
+
 # ALB의 HTTP 리스너 설정
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn  # ALB의 ARN을 지정하여 리스너를 연결
@@ -66,5 +74,22 @@ resource "aws_lb_listener_rule" "be_rule" {
   action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.be.arn
+  }
+}
+
+# AI 서비스로의 트래픽 라우팅 규칙
+resource "aws_lb_listener_rule" "ai_rule" {
+  listener_arn = aws_lb_listener.http.arn  # 기존 ALB 리스너과 같은 ARN
+  priority     = 300  # 다른 규칙과의 우선 순위를 조정하기 위해 설정
+
+  condition {
+    host_header {
+      values = [var.ai_host]  # AI 서비스에 대한 호스트명을 지정합니다.
+    }
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ai.arn  # AI 대상 그룹으로 트래픽 포워딩
   }
 }

@@ -9,3 +9,7 @@ output "be_target_group_arn" {
 output "fe_target_group_arn" {
   value = aws_lb_target_group.fe.arn
 }
+
+output "ai_target_group_arn" {
+  value = aws_lb_target_group.ai.arn
+}
