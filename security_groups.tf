@@ -112,6 +112,31 @@ module "auto_scaling_fe_security_group" {
   ]
 }
 
+# Auto Scaling AI 보안 그룹 모듈
+module "auto_scaling_ai_security_group" {
+  source        = "./modules/security-group"
+  name          = "auto_scaling_ai_security_group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port       = 80
+      to_port         = 80
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
+    }
+  ]
+
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
+
 # NAT 인스턴스 보안 그룹 모듈
 module "nat_security_group" {
   source = "./modules/security-group"

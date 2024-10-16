@@ -35,3 +35,8 @@ variable "backend_host" {
   default     = "backend.example.com"
 }
 
+variable "ai_host" {
+  description = "Host header for AI service routing"
+  type        = string
+  default     = "ai.example.com"
+}
