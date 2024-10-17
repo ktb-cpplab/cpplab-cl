@@ -2,64 +2,65 @@
 - hosts: all
   become: true  # 필요한 경우 sudo 권한으로 실행
   vars:
-    # 필요에 따라 변수 정의
-    spring_version: "2.5.4"
     java_version: "11"
-    maven_version: "3.6.3"
-    # WebSocket 및 관련 라이브러리
-    websocket_dependencies:
-      - "org.springframework.boot:spring-boot-starter-websocket"
-      - "org.springframework.security:spring-security-web"
-      - "org.springframework.security:spring-security-config"
+    docker_version: "20.10"
+    docker_compose_version: "1.29.2"
 
   tasks:
-    # 시스템 업테이트 : 인스턴스와 모든 패키지를 최신버전으로 업데이트합니다.
+    # 시스템 업데이트
     - name: Update the system
       ansible.builtin.yum:
         name: "*"
         state: latest
-    # Spring Boot에 필요한 Java를 설치합니다.
+
+    # Java 설치 (Spring 애플리케이션 실행용)
     - name: Install Java
       ansible.builtin.yum:
         name: "java-{{ java_version }}"
         state: present
-    # Maven 설치
-    - name: Install Maven
+
+    # Docker 설치
+    - name: Install Docker
       ansible.builtin.yum:
-        name: "maven"
+        name: "docker"
         state: present
-    # 프로젝트 디렉토리 생성
-    - name: Create project directory
-      ansible.builtin.file:
-        path: /opt/my-spring-app
-        state: directory
-    # Git에서 Spring 애플리케이션 클론
-    - name: Clone Spring application from Git repository
-      ansible.builtin.git:
-        repo: 'https://github.com/ktb-cpplab/cpplab-be.git'
-        dest: /opt/my-spring-app
-        version: master  # 필요한 경우 브랜치 수정
 
-    - name: Build the Spring application using Maven
-      ansible.builtin.command:
-        cmd: mvn clean install
-        args:
-          chdir: /opt/my-spring-app  # 빌드 디렉토리 설정
+    # Docker Compose 설치
+    - name: Install Docker Compose
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-$(uname -s)-$(uname -m)"
+        dest: "/usr/local/bin/docker-compose"
+        mode: '0755'
 
-    - name: Create application.properties file
-      ansible.builtin.template:
-        src: application.properties.j2
-        dest: /opt/my-spring-app/src/main/resources/application.properties
+    # Docker 서비스 시작
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
 
-    - name: Install WebSocket dependencies
-      ansible.builtin.lineinfile:
-        path: /opt/my-spring-app/pom.xml
-        line: "<dependency><groupId>{{ item.split(':')[0] }}</groupId><artifactId>{{ item.split(':')[1] }}</artifactId><version>{{ spring_version }}</version></dependency>"
+    # Jenkins 작업 (젠킨스는 별도 서버에 설치되어 있다고 가정)
+    - name: Ensure Jenkins is installed
+      ansible.builtin.yum:
+        name: jenkins
         state: present
-      loop: "{{ websocket_dependencies }}"
+        become: true
 
-    - name: Start Spring application
+    # Jenkins 서비스 시작
+    - name: Start Jenkins service
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    # Docker 그룹에 Jenkins 사용자 추가 (Docker 명령어를 사용할 수 있게 설정)
+    - name: Add Jenkins user to docker group
+      ansible.builtin.user:
+        name: jenkins
+        groups: docker
+        append: true
+
+    # Jenkins 작업 생성 및 실행
+    - name: Create Jenkins job for Docker build and deploy
       ansible.builtin.command:
-        cmd: java -jar /opt/my-spring-app/target/my-spring-app-{{ spring_version }}.jar
-      async: 10
-      poll: 0  # 비동기 실행
+        cmd: "java -jar /var/lib/jenkins/jenkins-cli.jar create-job spring-app < /path/to/spring-app-config.xml"
