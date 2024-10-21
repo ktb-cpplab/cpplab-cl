@@ -1,3 +1,4 @@
+# fe, be, ai 로드밸런서
 resource "aws_lb" "this" {
   name               = var.lb_name
   internal           = var.internal

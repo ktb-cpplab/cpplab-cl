@@ -36,7 +36,7 @@ module "ssm_iam_role" {
 module "jenkins_instance" {
   source = "./modules/ec2-instance"
 
-  ami                  = var.instance_ami
+  ami                  = var.jenkins_ami
   instance_type        = "t3a.medium"
   key_name             = var.key_name
   security_group_id    = module.jenkins_security_group.security_group_id
@@ -103,6 +103,7 @@ module "auto_scaling_be" {
   target_group_arns          = [module.alb.be_target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_fe" {
@@ -119,6 +120,7 @@ module "auto_scaling_fe" {
   min_size                   = 1
   target_group_arns          = [module.alb.fe_target_group_arn]
   tag_name                   = "Frontend"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_ai" {
@@ -126,7 +128,7 @@ module "auto_scaling_ai" {
   name_prefix                = "launch-template-"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
   key_name                   = var.key_name
@@ -134,5 +136,23 @@ module "auto_scaling_ai" {
   max_size                   = 2
   min_size                   = 1
   target_group_arns          = [module.alb.ai_target_group_arn]
+  iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
+
+# # ECS 모듈 호출
+# module "ecs" {
+#   source                     = "./modules/ecs"
+
+#   name_prefix                = "cpplab-ecs"  # ECS 리소스 명명 시 사용할 접두사
+#   container_image            = var.container_image  # 사용할 도커 이미지
+#   container_cpu              = var.container_cpu  # 컨테이너에 할당할 CPU 유닛
+#   container_memory           = var.container_memory  # 컨테이너에 할당할 메모리
+#   container_port             = var.container_port  # 컨테이너에서 사용할 포트
+#   host_port                  = var.host_port  # 호스트에서 매핑할 포트
+#   desired_count              = var.desired_count  # 원하는 실행 중인 태스크 수
+#   subnet_ids                 = module.vpc.private_subnet_ids  # ECS가 배포될 서브넷 ID
+#   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # ECS 서비스의 보안 그룹 ID
+#   target_group_arns          = [module.alb.be_target_group_arn]  # EC2 서비스와 관련된 타겟 그룹 ARN
+# }

@@ -1,0 +1,66 @@
+---
+- hosts: all
+  become: true  # 필요한 경우 sudo 권한으로 실행
+  vars:
+    java_version: "11"
+    docker_version: "20.10"
+    docker_compose_version: "1.29.2"
+
+  tasks:
+    # 시스템 업데이트
+    - name: Update the system
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+
+    # Java 설치 (Spring 애플리케이션 실행용)
+    - name: Install Java
+      ansible.builtin.yum:
+        name: "java-{{ java_version }}"
+        state: present
+
+    # Docker 설치
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: "docker"
+        state: present
+
+    # Docker Compose 설치
+    - name: Install Docker Compose
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-$(uname -s)-$(uname -m)"
+        dest: "/usr/local/bin/docker-compose"
+        mode: '0755'
+
+    # Docker 서비스 시작
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Jenkins 작업 (젠킨스는 별도 서버에 설치되어 있다고 가정)
+    - name: Ensure Jenkins is installed
+      ansible.builtin.yum:
+        name: jenkins
+        state: present
+        become: true
+
+    # Jenkins 서비스 시작
+    - name: Start Jenkins service
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    # Docker 그룹에 Jenkins 사용자 추가 (Docker 명령어를 사용할 수 있게 설정)
+    - name: Add Jenkins user to docker group
+      ansible.builtin.user:
+        name: jenkins
+        groups: docker
+        append: true
+
+    # Jenkins 작업 생성 및 실행
+    - name: Create Jenkins job for Docker build and deploy
+      ansible.builtin.command:
+        cmd: "java -jar /var/lib/jenkins/jenkins-cli.jar create-job spring-app < /path/to/spring-app-config.xml"
