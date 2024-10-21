@@ -136,3 +136,19 @@ module "auto_scaling_ai" {
   target_group_arns          = [module.alb.ai_target_group_arn]
   tag_name                   = "AI"
 }
+
+# # ECS 모듈 호출
+# module "ecs" {
+#   source                     = "./modules/ecs"
+
+#   name_prefix                = "cpplab-ecs"  # ECS 리소스 명명 시 사용할 접두사
+#   container_image            = var.container_image  # 사용할 도커 이미지
+#   container_cpu              = var.container_cpu  # 컨테이너에 할당할 CPU 유닛
+#   container_memory           = var.container_memory  # 컨테이너에 할당할 메모리
+#   container_port             = var.container_port  # 컨테이너에서 사용할 포트
+#   host_port                  = var.host_port  # 호스트에서 매핑할 포트
+#   desired_count              = var.desired_count  # 원하는 실행 중인 태스크 수
+#   subnet_ids                 = module.vpc.private_subnet_ids  # ECS가 배포될 서브넷 ID
+#   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # ECS 서비스의 보안 그룹 ID
+#   target_group_arns          = [module.alb.be_target_group_arn]  # EC2 서비스와 관련된 타겟 그룹 ARN
+# }

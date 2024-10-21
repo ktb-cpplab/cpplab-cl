@@ -11,7 +11,7 @@ instance_type = "t2.micro"
 nat_instance_type = "t2.micro"
 
 nat_ami = "ami-0e0ce674db551c1a5"
-instance_ami = "ami-062cf18d655c0b1e8"
+instance_ami = "ami-0a00cdcff322a4cf2"  # docker 설치된 ami
 
 security_group_id = "sg-0123456789abcdef0"
 
