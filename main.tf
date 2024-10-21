@@ -79,20 +79,9 @@ module "jenkins_instance" {
 #   }
 # }
 
-#jenkis alb
-module "jenkins_alb" {
-  source            = "./modules/alb"
-  lb_name           = "jenkins-lb"
-  internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
-  vpc_id            = module.vpc.vpc_id
-}
-
-
 module "alb" {
   source            = "./modules/alb"
-  lb_name           = "app-lb"
+  lb_name           = "alb"
   internal          = false
   security_group_ids = [module.alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
