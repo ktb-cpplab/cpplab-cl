@@ -39,6 +39,11 @@ variable "nat_ami" {
   default     = "ami-0e0ce674db551c1a5"
 }
 
+variable "jenkins_ami" {
+  description = "AMI ID for Jenkins Instance"
+  default     = "ami-0723dbf2481162caf"
+}
+
 variable "instance_ami" {
   description = "AMI ID for Backend/Frontend/Jenkins Instances"
   default     = "ami-062cf18d655c0b1e8"
@@ -63,4 +68,3 @@ variable "tags" {
     ManagedBy   = "terraform"
   }
 }
-

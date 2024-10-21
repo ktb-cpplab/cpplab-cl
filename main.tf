@@ -36,7 +36,7 @@ module "ssm_iam_role" {
 module "jenkins_instance" {
   source = "./modules/ec2-instance"
 
-  ami                  = var.instance_ami
+  ami                  = var.jenkins_ami
   instance_type        = "t3a.medium"
   key_name             = var.key_name
   security_group_id    = module.jenkins_security_group.security_group_id
@@ -103,6 +103,7 @@ module "auto_scaling_be" {
   target_group_arns          = [module.alb.be_target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_fe" {
@@ -119,6 +120,7 @@ module "auto_scaling_fe" {
   min_size                   = 1
   target_group_arns          = [module.alb.fe_target_group_arn]
   tag_name                   = "Frontend"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_ai" {
@@ -126,7 +128,7 @@ module "auto_scaling_ai" {
   name_prefix                = "launch-template-"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
   key_name                   = var.key_name
@@ -134,7 +136,9 @@ module "auto_scaling_ai" {
   max_size                   = 2
   min_size                   = 1
   target_group_arns          = [module.alb.ai_target_group_arn]
+  iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
+  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 # # ECS 모듈 호출
