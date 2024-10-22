@@ -7,6 +7,9 @@ pipeline {
         ECR_CREDENTIALS_ID = 'ecr:ap-northeast-2:AWS_CREDENTIALS'
         GITHUB_CREDENTIALS_ID = 'github_token'
         REMOTE_USER = 'ubuntu'
+        ECS_CLUSTER_NAME = 'cpplab-ecs-cluster'
+        ECS_SERVICE_NAME = 'my-be-service'
+        AWS_REGION = 'ap-northeast-2'
     }
 
     stages {
@@ -35,6 +38,17 @@ pipeline {
                     docker.withRegistry("https://${ECR_REPO}", "$ECR_CREDENTIALS_ID") {
                         dockerImage.push("latest")
                     }
+                }
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                script {
+                    currentBuild.description = 'Update ECS Service'
+                    sh """
+                    aws ecs update-service --cluster ${ECS_CLUSTER_NAME} --service ${ECS_SERVICE_NAME} --force-new-deployment --region ${AWS_REGION}
+                    """
                 }
             }
         }
