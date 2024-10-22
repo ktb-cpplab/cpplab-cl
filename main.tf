@@ -158,7 +158,7 @@ module "ecs_ai" {
   cpu                        = 256                         # CPU 유닛
   container_port             = 8080                        # AI 서비스에 대한 컨테이너 포트
   host_port                  = 8080                        # 호스트 포트
-  desired_count              = 2                           # AI 태스크의 원하는 개수
+  desired_count              = 1                           # AI 태스크의 원하는 개수
   subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.ai_target_group_arn  # ALB 타겟 그룹 ARN
@@ -177,7 +177,7 @@ module "ecs_be" {
   cpu                        = 256                         # CPU 유닛
   container_port             = 8081                        # BE 서비스에 대한 컨테이너 포트
   host_port                  = 8081                        # 호스트 포트
-  desired_count              = 2                           # BE 태스크의 원하는 개수
+  desired_count              = 1                           # BE 태스크의 원하는 개수
   subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.be_target_group_arn  # ALB 타겟 그룹 ARN
@@ -196,7 +196,7 @@ module "ecs_fe" {
   cpu                        = 256                         # CPU 유닛
   container_port             = 80                          # FE 서비스에 대한 컨테이너 포트
   host_port                  = 80                          # 호스트 포트
-  desired_count              = 2                           # FE 태스크의 원하는 개수
+  desired_count              = 1                           # FE 태스크의 원하는 개수
   subnet_ids                 = module.vpc.public_subnet_ids   # 퍼블릭 서브넷 ID
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.fe_target_group_arn  # ALB 타겟 그룹 ARN
