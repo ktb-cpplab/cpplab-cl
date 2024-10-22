@@ -46,9 +46,11 @@ pipeline {
             steps {
                 script {
                     currentBuild.description = 'Update ECS Service'
-                    sh """
-                    aws ecs update-service --cluster ${ECS_CLUSTER_NAME} --service ${ECS_SERVICE_NAME} --force-new-deployment --region ${AWS_REGION}
-                    """
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_CREDENTIALS']]) {
+                        sh """
+                        aws ecs update-service --cluster cpplab-ecs-cluster --service my-be-service --force-new-deployment --region ap-northeast-2
+                        """
+                    }
                 }
             }
         }
