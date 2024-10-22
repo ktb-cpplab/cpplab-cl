@@ -142,18 +142,63 @@ module "auto_scaling_ai" {
   //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
-# # ECS 모듈 호출
-# module "ecs" {
-#   source                     = "./modules/ecs"
+resource "aws_ecs_cluster" "this" {
+  name = "cpplab-ecs-cluster"  # 클러스터 이름
+}
+# ECS 모듈 호출
+# AI 파트
+module "ecs_ai" {
+  source                     = "./modules/ecs"
+  cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
+  #cluster_name               = "my-ecs-cluster"          # 클러스터 이름
+  task_family                = "ai-task-family"           # AI 태스크 정의 이름
+  container_name             = "ai-container"             # AI 컨테이너 이름
+  container_image            = "ai-docker-image:latest"   # AI Docker 이미지
+  memory                     = 512                         # 메모리
+  cpu                        = 256                         # CPU 유닛
+  container_port             = 8080                        # AI 서비스에 대한 컨테이너 포트
+  host_port                  = 8080                        # 호스트 포트
+  desired_count              = 2                           # AI 태스크의 원하는 개수
+  subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
+  security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]  # 보안 그룹 ID
+  target_group_arn           = module.alb.ai_target_group_arn  # ALB 타겟 그룹 ARN
+  service_name               = "my-ai-service"            # AI 서비스 이름
+}
 
-#   name_prefix                = "cpplab-ecs"  # ECS 리소스 명명 시 사용할 접두사
-#   container_image            = var.container_image  # 사용할 도커 이미지
-#   container_cpu              = var.container_cpu  # 컨테이너에 할당할 CPU 유닛
-#   container_memory           = var.container_memory  # 컨테이너에 할당할 메모리
-#   container_port             = var.container_port  # 컨테이너에서 사용할 포트
-#   host_port                  = var.host_port  # 호스트에서 매핑할 포트
-#   desired_count              = var.desired_count  # 원하는 실행 중인 태스크 수
-#   subnet_ids                 = module.vpc.private_subnet_ids  # ECS가 배포될 서브넷 ID
-#   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # ECS 서비스의 보안 그룹 ID
-#   target_group_arns          = [module.alb.be_target_group_arn]  # EC2 서비스와 관련된 타겟 그룹 ARN
-# }
+# BE 파트
+module "ecs_be" {
+  source                     = "./modules/ecs"
+  cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
+  #cluster_name               = "my-ecs-cluster"          # 클러스터 이름
+  task_family                = "be-task-family"           # BE 태스크 정의 이름
+  container_name             = "be-container"             # BE 컨테이너 이름
+  container_image            = "be-docker-image:latest"   # BE Docker 이미지
+  memory                     = 512                         # 메모리
+  cpu                        = 256                         # CPU 유닛
+  container_port             = 8081                        # BE 서비스에 대한 컨테이너 포트
+  host_port                  = 8081                        # 호스트 포트
+  desired_count              = 2                           # BE 태스크의 원하는 개수
+  subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
+  security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # 보안 그룹 ID
+  target_group_arn           = module.alb.be_target_group_arn  # ALB 타겟 그룹 ARN
+  service_name               = "my-be-service"            # BE 서비스 이름
+}
+
+# FE 파트
+module "ecs_fe" {
+  source                     = "./modules/ecs"
+  cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
+  #cluster_name               = "my-ecs-cluster"           # 클러스터 이름
+  task_family                = "fe-task-family"           # FE 태스크 정의 이름
+  container_name             = "fe-container"             # FE 컨테이너 이름
+  container_image            = "fe-docker-image:latest"   # FE Docker 이미지
+  memory                     = 512                         # 메모리
+  cpu                        = 256                         # CPU 유닛
+  container_port             = 80                          # FE 서비스에 대한 컨테이너 포트
+  host_port                  = 80                          # 호스트 포트
+  desired_count              = 2                           # FE 태스크의 원하는 개수
+  subnet_ids                 = module.vpc.public_subnet_ids   # 퍼블릭 서브넷 ID
+  security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]  # 보안 그룹 ID
+  target_group_arn           = module.alb.fe_target_group_arn  # ALB 타겟 그룹 ARN
+  service_name               = "my-fe-service"             # FE 서비스의 이름입니다.
+}

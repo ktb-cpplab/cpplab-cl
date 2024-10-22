@@ -1,42 +1,14 @@
-resource "aws_ecs_cluster" "this" {
-  name = "${var.name_prefix}-ecs-cluster"
-}
-
-resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name_prefix}-ecs-task-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-      Effect = "Allow"
-      Sid    = ""
-    }]
-  })
-}
-
-resource "aws_iam_policy_attachment" "task_execution" {
-  name       = "${var.name_prefix}-task-execution"
-  roles      = [aws_iam_role.ecs_task_role.name]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
 resource "aws_ecs_task_definition" "this" {
-  family                   = "${var.name_prefix}-task"
-  execution_role_arn      = aws_iam_role.ecs_task_role.arn
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-
-  container_definitions = jsonencode([{
-    name      = "${var.name_prefix}-container"
+  family                   = var.task_family
+  network_mode             = "bridge"  # 현재 bridge로 설정
+  requires_compatibilities  = ["EC2"]
+  
+  container_definitions    = jsonencode([{
+    name      = var.container_name
     image     = var.container_image
-    cpu       = var.container_cpu
-    memory    = var.container_memory
+    memory    = var.memory
+    cpu       = var.cpu
     essential = true
-
     portMappings = [{
       containerPort = var.container_port
       hostPort      = var.host_port
@@ -46,21 +18,24 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "${var.name_prefix}-service"
-  cluster         = aws_ecs_cluster.this.id
+  name            = var.service_name
+  cluster         = var.cluster_id    # 부모 모듈에서 전달받은 클러스터 ID 사용
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
-  launch_type     = "FARGATE"
+  launch_type     = "EC2"
 
-  network_configuration {
-    subnets          = var.subnet_ids
-    security_groups  = var.security_group_ids
-    assign_public_ip = "ENABLED"
-  }
+  # network_configuration 제거
+  # network_configuration {
+  #    subnets          = var.subnet_ids
+  #    security_groups  = var.security_group_ids
+  # }
 
+  # ALB와 연결하는 설정
   load_balancer {
-    target_group_arn = var.target_group_arns[0]
-    container_name   = "${var.name_prefix}-container"
-    container_port   = var.container_port
+    target_group_arn = var.target_group_arn  # ALB 타겟 그룹 ARN
+    container_name   = var.container_name    # ALB와 연결할 컨테이너 이름
+    container_port   = var.container_port     # 컨테이너에서 사용하는 포트
   }
+
+  #depends_on = [aws_ecs_cluster.this]
 }
