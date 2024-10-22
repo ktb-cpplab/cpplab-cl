@@ -44,6 +44,7 @@ module "jenkins_instance" {
   instance_name        = "Jenkins"
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Jenkins" })
+  target_group_arn    = module.alb.jenkins-target-group-arn
 }
 
 # module "backend_instance" {
