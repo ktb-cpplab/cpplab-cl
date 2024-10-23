@@ -10,7 +10,7 @@ resource "aws_lb" "jenkins_lb" {
 # Jenkins 타겟 그룹
 resource "aws_lb_target_group" "jk" {
   name       = "jenkins-target-group"
-  port       = 80
+  port       = 8080
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"

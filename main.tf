@@ -26,7 +26,11 @@ module "ssm_iam_role" {
     }]
   })
   policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+    "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+    "arn:aws:iam::aws:policy/AutoScalingFullAccess"
   ]
   tags = {
     Environment = "dev"
@@ -46,39 +50,6 @@ module "jenkins_instance" {
   tags                 = merge(var.tags, { Name = "Jenkins" })
   target_group_arn    = module.alb.jenkins-target-group-arn
 }
-
-# module "backend_instance" {
-#   source = "./modules/ec2-instance"
-
-#   ami              = var.instance_ami
-#   instance_type    = var.instance_type
-#   key_name         = var.key_name
-#   security_group_id = aws_security_group.main.id
-#   subnet_id        = module.vpc.private_subnet_ids[0]
-#   instance_name     = "Backend"
-#   iam_instance_profile = module.ssm_iam_role.instance_profile_name
-#   tags             = merge(var.tags, { Name = "Backend" })
-# }
-
-# module "frontend_instance" {
-#   source = "./modules/ec2-instance"
-
-#   ami              = var.instance_ami
-#   instance_type    = var.instance_type
-#   key_name         = var.key_name
-#   security_group_id = aws_security_group.main.id
-#   subnet_id        = module.vpc.public_subnet_ids[0]
-#   instance_name     = "Frontend"
-#   tags             = merge(var.tags, { Name = "Frontend" })
-# }
-
-# resource "aws_eip" "frontend_eip" {
-#   vpc      = true
-#   instance = module.frontend_instance.id  # 프론트엔드 인스턴스에 연결
-#   tags = {
-#     Name = "Frontend EIP"
-#   }
-# }
 
 module "alb" {
   source            = "./modules/alb"
@@ -109,7 +80,7 @@ module "auto_scaling_be" {
 
 module "auto_scaling_fe" {
   source                     = "./modules/auto-scaling"
-  name_prefix                = "launch-template-"
+  name_prefix                = "launch-template-fe"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
   associate_public_ip_address = true
@@ -120,13 +91,14 @@ module "auto_scaling_fe" {
   max_size                   = 2
   min_size                   = 1
   target_group_arns          = [module.alb.fe_target_group_arn]
+  iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Frontend"
   //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_ai" {
   source                     = "./modules/auto-scaling"
-  name_prefix                = "launch-template-"
+  name_prefix                = "launch-template-ai"
   instance_ami               = var.instance_ami
   instance_type              = var.instance_type
   associate_public_ip_address = false
@@ -150,7 +122,6 @@ resource "aws_ecs_cluster" "this" {
 module "ecs_ai" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
-  #cluster_name               = "my-ecs-cluster"          # 클러스터 이름
   task_family                = "ai-task-family"           # AI 태스크 정의 이름
   container_name             = "ai-container"             # AI 컨테이너 이름
   container_image            = "ai-docker-image:latest"   # AI Docker 이미지
@@ -169,7 +140,6 @@ module "ecs_ai" {
 module "ecs_be" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
-  #cluster_name               = "my-ecs-cluster"          # 클러스터 이름
   task_family                = "be-task-family"           # BE 태스크 정의 이름
   container_name             = "be-container"             # BE 컨테이너 이름
   container_image            = "be-docker-image:latest"   # BE Docker 이미지
@@ -188,7 +158,6 @@ module "ecs_be" {
 module "ecs_fe" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
-  #cluster_name               = "my-ecs-cluster"           # 클러스터 이름
   task_family                = "fe-task-family"           # FE 태스크 정의 이름
   container_name             = "fe-container"             # FE 컨테이너 이름
   container_image            = "fe-docker-image:latest"   # FE Docker 이미지

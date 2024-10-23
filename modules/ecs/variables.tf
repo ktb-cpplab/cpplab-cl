@@ -1,8 +1,3 @@
-# variable "cluster_name" {
-#   description = "ECS 클러스터 이름"
-#   type        = string
-# }
-
 variable "task_family" {
   description = "ECS 태스크 정의 패밀리 이름"
   type        = string

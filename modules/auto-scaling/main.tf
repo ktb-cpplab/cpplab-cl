@@ -9,6 +9,13 @@ resource "aws_launch_template" "this" {
   }
 
   key_name = var.key_name
+
+  # User Data를 추가하여 인스턴스를 ECS 클러스터에 연결
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    echo "ECS_CLUSTER=cpplab-ecs-cluster" >> /etc/ecs/ecs.config
+  EOF
+  )
   
   # 조건부로 IAM 인스턴스 프로파일 추가
   dynamic "iam_instance_profile" {
