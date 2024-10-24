@@ -30,7 +30,8 @@ module "ssm_iam_role" {
     "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
     "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
     "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-    "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+    "arn:aws:iam::aws:policy/AutoScalingFullAccess",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
   tags = {
     Environment = "dev"
@@ -124,7 +125,7 @@ module "ecs_ai" {
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
   task_family                = "ai-task-family"           # AI 태스크 정의 이름
   container_name             = "ai-container"             # AI 컨테이너 이름
-  container_image            = "ai-docker-image:latest"   # AI Docker 이미지
+  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:latest"   # AI Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
   container_port             = 8080                        # AI 서비스에 대한 컨테이너 포트
@@ -142,7 +143,7 @@ module "ecs_be" {
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
   task_family                = "be-task-family"           # BE 태스크 정의 이름
   container_name             = "be-container"             # BE 컨테이너 이름
-  container_image            = "be-docker-image:latest"   # BE Docker 이미지
+  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/namespace/docker:latest"   # BE Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
   container_port             = 8081                        # BE 서비스에 대한 컨테이너 포트
@@ -160,7 +161,7 @@ module "ecs_fe" {
   cluster_id                 = aws_ecs_cluster.this.id  # 클러스터 ID 전달
   task_family                = "fe-task-family"           # FE 태스크 정의 이름
   container_name             = "fe-container"             # FE 컨테이너 이름
-  container_image            = "fe-docker-image:latest"   # FE Docker 이미지
+  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"   # FE Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
   container_port             = 80                          # FE 서비스에 대한 컨테이너 포트
