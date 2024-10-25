@@ -41,7 +41,7 @@ variable "nat_ami" {
 
 variable "jenkins_ami" {
   description = "AMI ID for Jenkins Instance"
-  default     = "ami-0723dbf2481162caf"
+  default     = "ami-04f296fcc99bb3bfc"
 }
 
 variable "instance_ami" {

@@ -40,3 +40,9 @@ variable "ai_host" {
   type        = string
   default     = "ai.example.com"
 }
+
+variable "jenkins_host" {
+  description = "Host header for jenkins service routing"
+  type        = string
+  default     = "jk.example.com"
+}
