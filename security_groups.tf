@@ -80,6 +80,12 @@ module "auto_scaling_be_security_group" {
       to_port         = 80
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 8080
+      to_port         = 8080
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
     }
   ]
 
@@ -105,6 +111,12 @@ module "auto_scaling_fe_security_group" {
       to_port         = 80
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 3000
+      to_port         = 3000
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
     }
   ]
 
@@ -128,6 +140,12 @@ module "auto_scaling_ai_security_group" {
     {
       from_port       = 80
       to_port         = 80
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 5000
+      to_port         = 5000
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
     }

@@ -37,19 +37,19 @@ resource "aws_lb" "main_lb" {
   subnets            = var.subnet_ids
 }
 
-# BE 타겟 그룹
-resource "aws_lb_target_group" "be" {
-  name       = "be-target-group"
-  port       = 80
+# 프론트엔드 타겟 그룹 (기본 타겟)
+resource "aws_lb_target_group" "fe" {
+  name       = "fe-target-group"
+  port       = 3000                       # 프론트엔드 서비스 포트
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
 }
 
-# FE 타겟 그룹
-resource "aws_lb_target_group" "fe" {
-  name       = "fe-target-group"
-  port       = 80
+# 백엔드 타겟 그룹
+resource "aws_lb_target_group" "be" {
+  name       = "be-target-group"
+  port       = 8080                       # 백엔드 서비스 포트
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
@@ -58,7 +58,7 @@ resource "aws_lb_target_group" "fe" {
 # AI 타겟 그룹
 resource "aws_lb_target_group" "ai" {
   name       = "ai-target-group"
-  port       = 80
+  port       = 5000                       # AI 서비스 포트
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
@@ -66,63 +66,46 @@ resource "aws_lb_target_group" "ai" {
 
 # ALB의 HTTP 리스너 설정
 resource "aws_lb_listener" "main_listener" {
-  load_balancer_arn = aws_lb.main_lb.arn  # 메인 ALB의 ARN 
-  port              = 80                    # HTTP 포트
-  protocol          = "HTTP"               
+  load_balancer_arn = aws_lb.main_lb.arn  # 메인 ALB의 ARN
+  port              = 80                  # ALB에서 트래픽 수신 포트
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.be.arn  # 기본 BE 대상 그룹 지정
+    target_group_arn = aws_lb_target_group.fe.arn  # 기본 프론트엔드 타겟 그룹
   }
 }
 
-# FE 서비스로의 트래픽 라우팅 규칙
-resource "aws_lb_listener_rule" "fe_rule" {
-  listener_arn = aws_lb_listener.main_listener.arn
-  priority     = 200  # 우선순위 조정
-
-  condition {
-    host_header {
-      values = [var.frontend_host]  # FE 서비스를 위한 호스트 헤더
-    }
-  }
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.fe.arn  # FE 타겟 그룹으로 트래픽 전달
-  }
-}
-
-# BE 서비스로의 트래픽 라우팅 규칙
+# 백엔드(/api) 경로로의 트래픽 라우팅 규칙
 resource "aws_lb_listener_rule" "be_rule" {
   listener_arn = aws_lb_listener.main_listener.arn
-  priority     = 100  # 우선순위 조정
+  priority     = 100  # 우선순위 설정
 
   condition {
-    host_header {
-      values = [var.backend_host]  # BE 서비스를 위한 호스트 헤더
+    path_pattern {
+      values = ["/api/*"]  # /api로 시작하는 모든 경로
     }
   }
-  
+
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.be.arn  # BE 타겟 그룹으로 트래픽 전달
+    target_group_arn = aws_lb_target_group.be.arn  # 백엔드 타겟 그룹으로 트래픽 전달
   }
 }
 
-# AI 서비스로의 트래픽 라우팅 규칙
+# AI(/ai) 경로로의 트래픽 라우팅 규칙
 resource "aws_lb_listener_rule" "ai_rule" {
   listener_arn = aws_lb_listener.main_listener.arn
-  priority     = 300  # 우선순위 조정
+  priority     = 200  # 우선순위 설정
 
   condition {
-    host_header {
-      values = [var.ai_host]  # FE 서비스를 위한 호스트 헤더
+    path_pattern {
+      values = ["/ai/*"]  # /ai로 시작하는 모든 경로
     }
   }
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.ai.arn  # FE 타겟 그룹으로 트래픽 전달
+    target_group_arn = aws_lb_target_group.ai.arn  # AI 타겟 그룹으로 트래픽 전달
   }
 }

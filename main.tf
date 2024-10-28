@@ -128,8 +128,8 @@ module "ecs_ai" {
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:latest"   # AI Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
-  container_port             = 80                        # AI 서비스에 대한 컨테이너 포트
-  host_port                  = 80                        # 호스트 포트
+  container_port             = 5000                        # AI 서비스에 대한 컨테이너 포트
+  host_port                  = 5000                        # 호스트 포트
   desired_count              = 1                           # AI 태스크의 원하는 개수
   subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]  # 보안 그룹 ID
@@ -146,8 +146,8 @@ module "ecs_be" {
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"   # BE Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
-  container_port             = 80                        # BE 서비스에 대한 컨테이너 포트
-  host_port                  = 80                        # 호스트 포트
+  container_port             = 8080                        # BE 서비스에 대한 컨테이너 포트
+  host_port                  = 8080                        # 호스트 포트
   desired_count              = 1                           # BE 태스크의 원하는 개수
   subnet_ids                 = module.vpc.private_subnet_ids  # 프라이빗 서브넷 ID
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # 보안 그룹 ID
@@ -164,8 +164,8 @@ module "ecs_fe" {
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"   # FE Docker 이미지
   memory                     = 512                         # 메모리
   cpu                        = 256                         # CPU 유닛
-  container_port             = 80                          # FE 서비스에 대한 컨테이너 포트
-  host_port                  = 80                          # 호스트 포트
+  container_port             = 3000                          # FE 서비스에 대한 컨테이너 포트
+  host_port                  = 3000                          # 호스트 포트
   desired_count              = 1                           # FE 태스크의 원하는 개수
   subnet_ids                 = module.vpc.public_subnet_ids   # 퍼블릭 서브넷 ID
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]  # 보안 그룹 ID
