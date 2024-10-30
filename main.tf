@@ -153,6 +153,41 @@ module "ecs_be" {
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.be_target_group_arn  # ALB 타겟 그룹 ARN
   service_name               = "my-be-service"            # BE 서비스 이름
+  # Secrets Manager 시크릿 전달
+  secrets = [
+    {
+      name      = "DB_URL"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_URL::"
+    },
+    {
+      name      = "DB_USERNAME"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_USERNAME::"
+    },
+    {
+      name      = "DB_PASSWORD"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_PASSWORD::"
+    },
+    {
+      name      = "JWT_SECRET"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:JWT_SECRET::"
+    },
+    {
+      name      = "KAKAO_CLIENT_ID"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_ID::"
+    },
+    {
+      name      = "KAKAO_CLIENT_SECRET"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_SECRET::"
+    },
+    {
+      name      = "NAVER_CLIENT_ID"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_ID::"
+    },
+    {
+      name      = "NAVER_CLIENT_SECRET"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_SECRET::"
+    }
+  ]
 }
 
 # FE 파트

@@ -62,3 +62,18 @@ variable "cluster_id" {
   description = "ECS 클러스터 ID"  # 클러스터 ID를 인수로 받습니다.
   type        = string               # 문자열 타입
 }
+
+variable "secrets" {
+  description = "List of secrets to inject into the container"
+  type        = list(object({
+    name      = string
+    valueFrom = string
+  }))
+  default = []
+}
+
+variable "some_value" {
+  description = "An example value for the environment variable"
+  type        = string
+  default     = "default_value"  # 필요에 따라 기본값 설정
+}
