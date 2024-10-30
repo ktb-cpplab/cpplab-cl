@@ -31,8 +31,7 @@ module "ssm_iam_role" {
     "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
     "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
     "arn:aws:iam::aws:policy/AutoScalingFullAccess",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-    "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
   tags = {
     Environment = "dev"
@@ -52,17 +51,15 @@ resource "aws_iam_role" "ecs_execution_role" {
   })
 }
 
-resource "aws_iam_policy" "secrets_access_policy" {
-  name        = "SecretsAccessPolicy"
-  description = "Allows ECS tasks to access AWS Secrets Manager"
+resource "aws_iam_policy" "parameter_access_policy" {
+  name        = "ParameterAccessPolicy"
+  description = "Allows ECS tasks to access AWS parameter Manager"
   
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
       Effect = "Allow",
       Action = [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret",
         "ecr:GetAuthorizationToken",
         "ecr:BatchCheckLayerAvailability",
         "ecr:GetDownloadUrlForLayer",
@@ -75,8 +72,8 @@ resource "aws_iam_policy" "secrets_access_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "attach_secrets_access_policy" {
-  policy_arn = aws_iam_policy.secrets_access_policy.arn
+resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
+  policy_arn = aws_iam_policy.parameter_access_policy.arn
   role       = aws_iam_role.ecs_execution_role.name
 }
 
@@ -198,7 +195,7 @@ module "ecs_be" {
   target_group_arn           = module.alb.be_target_group_arn
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn  # IAM 역할 ARN 전달
-  # Secrets Manager 시크릿 전달
+  # Parameter 전달
   secrets = [
     {
       name      = "DB_URL"
