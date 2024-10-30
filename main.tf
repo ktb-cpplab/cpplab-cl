@@ -38,6 +38,42 @@ module "ssm_iam_role" {
   }
 }
 
+module "ecs_execution_role"{
+  source            = "./modules/iam-role"
+  role_name         = "ecsTaskExecutionRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect    = "Allow",
+        Principal = { Service = "ecs-tasks.amazonaws.com" },
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+  policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+    aws_iam_policy.secrets_access.arn
+  ]
+}
+
+resource "aws_iam_policy" "secrets_access" {
+  name        = "SecretsManagerAccess"
+  description = "Policy to allow ECS tasks to access Secrets Manager"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "secretsmanager:GetSecretValue"
+        ],
+        Resource = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr"
+      }
+    ]
+  })
+}
+
 module "jenkins_instance" {
   source = "./modules/ec2-instance"
 
@@ -135,6 +171,7 @@ module "ecs_ai" {
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.ai_target_group_arn  # ALB 타겟 그룹 ARN
   service_name               = "my-ai-service"            # AI 서비스 이름
+  execution_role_arn = module.ecs_execution_role.arn
 }
 
 # BE 파트
@@ -153,39 +190,40 @@ module "ecs_be" {
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.be_target_group_arn  # ALB 타겟 그룹 ARN
   service_name               = "my-be-service"            # BE 서비스 이름
+  execution_role_arn = module.ecs_execution_role.arn
   # Secrets Manager 시크릿 전달
   secrets = [
     {
       name      = "DB_URL"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_URL::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_URL"
     },
     {
       name      = "DB_USERNAME"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_USERNAME::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_USERNAME"
     },
     {
       name      = "DB_PASSWORD"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_PASSWORD::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:DB_PASSWORD"
     },
     {
       name      = "JWT_SECRET"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:JWT_SECRET::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:JWT_SECRET"
     },
     {
       name      = "KAKAO_CLIENT_ID"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_ID::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_ID"
     },
     {
       name      = "KAKAO_CLIENT_SECRET"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_SECRET::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:KAKAO_CLIENT_SECRET"
     },
     {
       name      = "NAVER_CLIENT_ID"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_ID::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_ID"
     },
     {
       name      = "NAVER_CLIENT_SECRET"
-      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_SECRET::"
+      valueFrom = "arn:aws:secretsmanager:ap-northeast-2:891612581533:secret:ECS/Spring/Properties-sabTdr:NAVER_CLIENT_SECRET"
     }
   ]
 }
@@ -206,4 +244,5 @@ module "ecs_fe" {
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]  # 보안 그룹 ID
   target_group_arn           = module.alb.fe_target_group_arn  # ALB 타겟 그룹 ARN
   service_name               = "my-fe-service"             # FE 서비스의 이름입니다.
+  execution_role_arn = module.ecs_execution_role.arn
 }

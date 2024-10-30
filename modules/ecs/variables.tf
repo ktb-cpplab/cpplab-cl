@@ -77,3 +77,8 @@ variable "some_value" {
   type        = string
   default     = "default_value"  # 필요에 따라 기본값 설정
 }
+
+variable "execution_role_arn" {
+  description = "IAM role ARN for ECS task execution"
+  type        = string
+}

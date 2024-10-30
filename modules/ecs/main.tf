@@ -2,7 +2,8 @@ resource "aws_ecs_task_definition" "this" {
   family                   = var.task_family
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
-  
+  execution_role_arn       = var.execution_role_arn
+
   container_definitions = jsonencode([{
     name      = var.container_name
     image     = var.container_image
@@ -15,14 +16,6 @@ resource "aws_ecs_task_definition" "this" {
       protocol      = "tcp"
     }]
     
-    # 환경 변수 및 시크릿 추가
-    environment = [
-      {
-        name  = "ENV_VAR_NAME"
-        value = var.some_value
-      }
-    ]
-
     secrets = var.secrets
   }])
 }
