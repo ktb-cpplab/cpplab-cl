@@ -34,6 +34,11 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
+variable "be_instance_type" {
+  description = "Default instance type"
+  default     = "t3a.medium"
+}
+
 variable "nat_ami" {
   description = "AMI ID for NAT Instance"
   default     = "ami-0e0ce674db551c1a5"
@@ -68,3 +73,5 @@ variable "tags" {
     ManagedBy   = "terraform"
   }
 }
+
+
