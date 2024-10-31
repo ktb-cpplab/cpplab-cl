@@ -78,8 +78,7 @@ resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
 }
 
 module "jenkins_instance" {
-  source = "./modules/ec2-instance"
-
+  source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
   instance_type        = "t3a.medium"
   key_name             = var.key_name
@@ -88,12 +87,15 @@ module "jenkins_instance" {
   instance_name        = "Jenkins"
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Jenkins" })
-  target_group_arn    = module.alb.jenkins-target-group-arn
+}
+
+resource "aws_lb_target_group_attachment" "example" {
+  target_group_arn = module.alb.jenkins-target-group-arn   # ALB 타겟 그룹의 ARN을 변수로 받음
+  target_id        = module.jenkins_instance.instance_id
 }
 
 module "redis_instance" {
-  source = "./modules/ec2-instance"
-
+  source               = "./modules/ec2-instance"
   ami                  = var.redis_ami
   instance_type        = var.instance_type
   key_name             = var.key_name
@@ -102,7 +104,6 @@ module "redis_instance" {
   instance_name        = "Redis-ec2"
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Redis" })
-  target_group_arn    = null    # 변수를 통해 타겟 그룹 ARN을 가져옵니다.
 }
 
 module "alb" {

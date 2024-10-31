@@ -91,3 +91,33 @@ variable "max_task_count" {
 variable "min_task_count" {
   default = 1  # 최소 태스크 수
 }
+
+variable "min_capacity" {
+  description = "Minimum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 1
+}
+
+variable "max_capacity" {
+  description = "Maximum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 2
+}
+
+variable "memory_utilization_target" {
+  description = "Memory utilization target for auto-scaling"
+  type        = number
+  default     = 70.0
+}
+
+variable "scale_in_cooldown" {
+  description = "Cooldown period for scale-in"
+  type        = number
+  default     = 300
+}
+
+variable "scale_out_cooldown" {
+  description = "Cooldown period for scale-out"
+  type        = number
+  default     = 300
+}

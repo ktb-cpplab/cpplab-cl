@@ -46,12 +46,12 @@ resource "aws_ecs_service" "this" {
 
 # ECS Service Auto Scaling Target
 resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = 2                         # 최대 태스크 수
-  min_capacity       = 1                         # 최소 태스크 수
+  max_capacity       = var.max_capacity           # 최대 태스크 수
+  min_capacity       = var.min_capacity           # 최소 태스크 수
   resource_id        = "service/${var.cluster_id}/${var.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
-  depends_on         = [aws_ecs_service.this]    # 종속성 추가
+  depends_on         = [aws_ecs_service.this]
 }
 
 # Target Tracking Scaling Policy for ECS Memory Utilization
@@ -63,11 +63,11 @@ resource "aws_appautoscaling_policy" "memory_target_tracking" {
   policy_type            = "TargetTrackingScaling"
 
   target_tracking_scaling_policy_configuration {
-    target_value = 1.0                              # 목표 메모리 사용률 (%)
+    target_value = var.memory_utilization_target  # 목표 메모리 사용률 (%)
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
-    scale_in_cooldown  = 300                        # 축소 휴지 기간
-    scale_out_cooldown = 300                        # 확장 휴지 기간
+    scale_in_cooldown  = var.scale_in_cooldown    # 축소 휴지 기간
+    scale_out_cooldown = var.scale_out_cooldown   # 확장 휴지 기간
   }
 }

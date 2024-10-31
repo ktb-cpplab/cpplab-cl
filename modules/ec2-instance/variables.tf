@@ -38,7 +38,3 @@ variable "tags" {
   description = "Tags for the EC2 instance"
   type        = map(string)
 }
-variable "target_group_arn" {
-  description = "The ARN of the target group to attach the EC2 instance to"
-  type        = string
-}
