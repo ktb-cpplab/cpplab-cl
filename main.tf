@@ -302,7 +302,7 @@ module "rds_postgres" {
 
 # RDS 엔드포인트를 Parameter Store에 갱신
 module "update_rds_endpoint" {
-  source          = "./modules/write-param"          # 모듈 경로
-  parameter_name  = "/ecs/spring/DB_URL"            # Parameter Store의 경로
-  new_value       = module.rds_postgres.rds_endpoint         # RDS 모듈에서 출력된 엔드포인트 값을 전달
+  source          = "./modules/write-param"           # 모듈 경로
+  parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
+  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}:5432/postgres"  # RDS 엔드포인트 값을 문자열로 연결
 }

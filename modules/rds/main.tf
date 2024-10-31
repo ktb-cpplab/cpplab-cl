@@ -24,6 +24,9 @@ resource "aws_db_instance" "this" {
   storage_type        = var.storage_type
   max_allocated_storage = var.max_allocated_storage
 
+  # Snapshot settings on deletion
+  skip_final_snapshot    = true 
+  
   # Tags
   tags = var.tags
 }
