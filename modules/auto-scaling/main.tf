@@ -43,3 +43,18 @@ resource "aws_autoscaling_group" "this" {
     propagate_at_launch = true
   }
 }
+
+# ASG에 CPU 사용률 기반 Target Tracking Policy 추가
+resource "aws_autoscaling_policy" "cpu_target_tracking" {
+  autoscaling_group_name = aws_autoscaling_group.this.name
+  name                   = "cpu-target-tracking-policy"
+  policy_type            = "TargetTrackingScaling"
+  estimated_instance_warmup = 300  # 인스턴스가 추가된 후 안정화되는 데 필요한 시간 (초)
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"  # ASG의 평균 CPU 사용률 기반
+    }
+    target_value = 70.0  # 목표 CPU 사용률 (%)
+  }
+}

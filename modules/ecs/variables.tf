@@ -82,3 +82,12 @@ variable "execution_role_arn" {
   description = "IAM role ARN for ECS task execution"
   type        = string
 }
+
+
+variable "max_task_count" {
+  default = 2  # 최대 태스크 수
+}
+
+variable "min_task_count" {
+  default = 1  # 최소 태스크 수
+}
