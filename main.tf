@@ -89,7 +89,7 @@ module "jenkins_instance" {
   instance_name        = "Jenkins"
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Jenkins" })
-  target_group_arn    = module.alb.jenkins-target-group-arn
+  target_group_arn    = null
 }
 
 module "alb" {
@@ -304,5 +304,5 @@ module "rds_postgres" {
 module "update_rds_endpoint" {
   source          = "./modules/write-param"           # 모듈 경로
   parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
-  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}:5432/postgres"  # RDS 엔드포인트 값을 문자열로 연결
+  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"  # RDS 엔드포인트 값을 문자열로 연결
 }
