@@ -44,6 +44,7 @@ resource "aws_lb_target_group" "fe" {
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
+  deregistration_delay = var.deregistration_delay_time
 }
 
 # 백엔드 타겟 그룹
@@ -53,6 +54,7 @@ resource "aws_lb_target_group" "be" {
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
+  deregistration_delay = var.deregistration_delay_time
 }
 
 # AI 타겟 그룹
@@ -62,6 +64,7 @@ resource "aws_lb_target_group" "ai" {
   protocol   = "HTTP"
   vpc_id     = var.vpc_id
   target_type = "instance"
+  deregistration_delay = var.deregistration_delay_time
 }
 
 # ALB의 HTTP 리스너 설정

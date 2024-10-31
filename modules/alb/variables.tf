@@ -46,3 +46,9 @@ variable "jenkins_host" {
   type        = string
   default     = "jk.example.com"
 }
+
+variable "deregistration_delay_time" {
+  description = "deregistration_delay_time"
+  type        = string
+  default     = "60"
+}
