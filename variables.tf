@@ -50,8 +50,18 @@ variable "jenkins_ami" {
 }
 
 variable "instance_ami" {
-  description = "AMI ID for Backend/Frontend/Jenkins Instances"
+  description = "AMI ID for Frontend/Jenkins Instances"
   default     = "ami-062cf18d655c0b1e8"
+}
+
+variable "be_ami" {
+  description = "AMI ID for Backend Instances"
+  default     = "ami-008826d9fbd497026"
+}
+
+variable "redis_ami" {
+  description = "AMI ID for Redis (EC2) Instance"
+  default     = "ami-01ce306e867ff466f"
 }
 
 variable "security_group_id" { 

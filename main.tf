@@ -77,7 +77,6 @@ resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
   role       = aws_iam_role.ecs_execution_role.name
 }
 
-
 module "jenkins_instance" {
   source = "./modules/ec2-instance"
 
@@ -92,6 +91,20 @@ module "jenkins_instance" {
   target_group_arn    = module.alb.jenkins-target-group-arn
 }
 
+module "redis_instance" {
+  source = "./modules/ec2-instance"
+
+  ami                  = var.redis_ami
+  instance_type        = var.instance_type
+  key_name             = var.key_name
+  security_group_id    = module.redis_security_group.security_group_id
+  subnet_id            = module.vpc.private_subnet_ids[0]
+  instance_name        = "Redis-ec2"
+  iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  tags                 = merge(var.tags, { Name = "Redis" })
+  target_group_arn    = null    # 변수를 통해 타겟 그룹 ARN을 가져옵니다.
+}
+
 module "alb" {
   source            = "./modules/alb"
   lb_name           = "alb"
@@ -104,8 +117,8 @@ module "alb" {
 module "auto_scaling_be" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-be"
-  instance_ami               = var.instance_ami
-  instance_type              = var.be_instance_type
+  instance_ami               = var.be_ami
+  instance_type              = var.instance_type
   associate_public_ip_address = false
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
@@ -304,5 +317,5 @@ module "rds_postgres" {
 module "update_rds_endpoint" {
   source          = "./modules/write-param"           # 모듈 경로
   parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
-  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}:5432/postgres"  # RDS 엔드포인트 값을 문자열로 연결
+  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"  # RDS 엔드포인트 값을 문자열로 연결
 }

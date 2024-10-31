@@ -1,4 +1,33 @@
 # security_groups.tf
+# Redis 보안 그룹 모듈
+module "redis_security_group" {
+  source        = "./modules/security-group"
+  name          = "redis-security-group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port   = 6379
+      to_port     = 6379
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_be_security_group.security_group_id]
+    },
+    {
+      from_port   = 6379
+      to_port     = 6379
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_ai_security_group.security_group_id]
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
 
 # Jenkins 보안 그룹 모듈
 module "jenkins_security_group" {
