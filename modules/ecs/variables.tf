@@ -63,6 +63,11 @@ variable "cluster_id" {
   type        = string               # 문자열 타입
 }
 
+variable "cluster_name" {
+  description = "ECS 클러스터 name"  # 클러스터 ID를 인수로 받습니다.
+  type        = string               # 문자열 타입
+}
+
 variable "secrets" {
   description = "List of secrets to inject into the container"
   type        = list(object({
@@ -121,3 +126,10 @@ variable "scale_out_cooldown" {
   type        = number
   default     = 300
 }
+
+variable "network_mode" {
+  description = "network_mode"
+  type        = string
+  default     = "bridge"
+}
+

@@ -16,6 +16,7 @@ instance_ami = "ami-0e0a3f6889d16c659"  # docker 설치된 ami
 jenkins_ami = "ami-0185cfa58cccb3358"   # jenkins ami (수정완료)
 be_ami = "ami-008826d9fbd497026"
 redis_ami = "ami-01ce306e867ff466f"
+mt_ami = "ami-040c33c6a51fd5d96"
 
 
 security_group_id = "sg-0123456789abcdef0"

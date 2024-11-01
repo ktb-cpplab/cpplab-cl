@@ -106,17 +106,17 @@ module "redis_instance" {
   tags                 = merge(var.tags, { Name = "Redis" })
 }
 
-# module "Monitor_instance" {
-#   source               = "./modules/ec2-instance"
-#   ami                  = var.instance_ami
-#   instance_type        = var.instance_type
-#   key_name             = var.key_name
-#   security_group_id    = module.mt_security_group.security_group_id
-#   subnet_id            = module.vpc.public_subnet_ids[0]
-#   instance_name        = "Monitor-ec2"
-#   iam_instance_profile = module.ssm_iam_role.instance_profile_name
-#   tags                 = merge(var.tags, { Name = "Monitor" })
-# }
+module "Monitor_instance" {
+  source               = "./modules/ec2-instance"
+  ami                  = var.mt_ami
+  instance_type        = var.instance_type
+  key_name             = var.key_name
+  security_group_id    = module.mt_security_group.security_group_id
+  subnet_id            = module.vpc.public_subnet_ids[0]
+  instance_name        = "Monitor-ec2"
+  iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  tags                 = merge(var.tags, { Name = "Monitor" })
+}
 
 module "alb" {
   source            = "./modules/alb"
@@ -190,6 +190,7 @@ resource "aws_ecs_cluster" "this" {
 module "ecs_ai" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
+  cluster_name               = aws_ecs_cluster.this.name
   task_family                = "ai-task-family"
   container_name             = "ai-container"
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:latest"
@@ -208,6 +209,7 @@ module "ecs_ai" {
 module "ecs_be" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
+  cluster_name               = aws_ecs_cluster.this.name
   task_family                = "be-task-family"
   container_name             = "be-container"
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
@@ -253,6 +255,7 @@ module "ecs_be" {
 module "ecs_fe" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
+  cluster_name               = aws_ecs_cluster.this.name
   task_family                = "fe-task-family"
   container_name             = "fe-container"
   container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"

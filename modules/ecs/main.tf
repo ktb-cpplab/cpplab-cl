@@ -1,6 +1,6 @@
 resource "aws_ecs_task_definition" "this" {
   family                   = var.task_family
-  network_mode             = "bridge"
+  network_mode             = var.network_mode
   requires_compatibilities = ["EC2"]
   execution_role_arn       = var.execution_role_arn
 
@@ -22,52 +22,49 @@ resource "aws_ecs_task_definition" "this" {
 
 resource "aws_ecs_service" "this" {
   name            = var.service_name
-  cluster         = var.cluster_id    # 부모 모듈에서 전달받은 클러스터 ID 사용
+  cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
   launch_type     = "EC2"
 
-  # network_configuration 제거
-  # network_configuration {
-  #    subnets          = var.subnet_ids
-  #    security_groups  = var.security_group_ids
-  # }
-
-  # ALB와 연결하는 설정
-  load_balancer {
-    target_group_arn = var.target_group_arn  # ALB 타겟 그룹 ARN
-    container_name   = var.container_name    # ALB와 연결할 컨테이너 이름
-    container_port   = var.container_port     # 컨테이너에서 사용하는 포트
+  dynamic "network_configuration" {
+    for_each = var.network_mode == "awsvpc" ? [1] : []
+    content {
+      subnets         = var.subnet_ids
+      security_groups = var.security_group_ids
+      assign_public_ip = false
+    }
   }
 
-  #depends_on = [aws_ecs_cluster.this]
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = var.container_name
+    container_port   = var.container_port
+  }
 }
 
-
-# ECS Service Auto Scaling Target
 resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = var.max_capacity           # 최대 태스크 수
-  min_capacity       = var.min_capacity           # 최소 태스크 수
-  resource_id        = "service/${var.cluster_id}/${var.service_name}"
+  max_capacity       = 2
+  min_capacity       = 1
+  resource_id        = "service/${var.cluster_name}/${var.service_name}" # 클러스터와 서비스 이름을 여기에 입력
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
   depends_on         = [aws_ecs_service.this]
 }
 
-# Target Tracking Scaling Policy for ECS Memory Utilization
-resource "aws_appautoscaling_policy" "memory_target_tracking" {
-  name                   = "${var.service_name}-memory-scaling-policy"
-  resource_id            = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
-  policy_type            = "TargetTrackingScaling"
+resource "aws_appautoscaling_policy" "ecs_policy" {
+  name               = var.service_name
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = var.memory_utilization_target  # 목표 메모리 사용률 (%)
     predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    scale_in_cooldown  = var.scale_in_cooldown    # 축소 휴지 기간
-    scale_out_cooldown = var.scale_out_cooldown   # 확장 휴지 기간
+    target_value       = 70
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 300
   }
 }

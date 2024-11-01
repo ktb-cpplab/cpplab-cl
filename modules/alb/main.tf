@@ -39,32 +39,59 @@ resource "aws_lb" "main_lb" {
 
 # 프론트엔드 타겟 그룹 (기본 타겟)
 resource "aws_lb_target_group" "fe" {
-  name       = "fe-target-group"
-  port       = 3000                       # 프론트엔드 서비스 포트
-  protocol   = "HTTP"
-  vpc_id     = var.vpc_id
-  target_type = "instance"
+  name                 = "fe-target-group"
+  port                 = 3000                       # 프론트엔드 서비스 포트
+  protocol             = "HTTP"
+  vpc_id               = var.vpc_id
+  target_type          = "instance"
   deregistration_delay = var.deregistration_delay_time
+
+  health_check {
+    path                = "/"                # 헬스 체크 경로
+    interval            = 30                       # 헬스 체크 간격 (초)
+    timeout             = 5                        # 헬스 체크 타임아웃 (초)
+    healthy_threshold   = 3                        # 헬스 체크 성공 기준 횟수
+    unhealthy_threshold = 3                        # 헬스 체크 실패 기준 횟수
+    matcher             = "200"                    # 헬스 체크 상태 코드 매처
+  }
 }
 
 # 백엔드 타겟 그룹
 resource "aws_lb_target_group" "be" {
-  name       = "be-target-group"
-  port       = 8080                       # 백엔드 서비스 포트
-  protocol   = "HTTP"
-  vpc_id     = var.vpc_id
-  target_type = "instance"
+  name                 = "be-target-group"
+  port                 = 8080                       # 백엔드 서비스 포트
+  protocol             = "HTTP"
+  vpc_id               = var.vpc_id
+  target_type          = "instance"
   deregistration_delay = var.deregistration_delay_time
+
+  health_check {
+    path                = "/api/v1/auth/my"             # 헬스 체크 경로
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 }
 
 # AI 타겟 그룹
 resource "aws_lb_target_group" "ai" {
-  name       = "ai-target-group"
-  port       = 5000                       # AI 서비스 포트
-  protocol   = "HTTP"
-  vpc_id     = var.vpc_id
-  target_type = "instance"
+  name                 = "ai-target-group"
+  port                 = 5000                       # AI 서비스 포트
+  protocol             = "HTTP"
+  vpc_id               = var.vpc_id
+  target_type          = "instance"
   deregistration_delay = var.deregistration_delay_time
+
+  health_check {
+    path                = "/ai/health"              # 헬스 체크 경로
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 }
 
 # ALB의 HTTP 리스너 설정
