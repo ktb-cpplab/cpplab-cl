@@ -106,6 +106,18 @@ module "redis_instance" {
   tags                 = merge(var.tags, { Name = "Redis" })
 }
 
+# module "Monitor_instance" {
+#   source               = "./modules/ec2-instance"
+#   ami                  = var.instance_ami
+#   instance_type        = var.instance_type
+#   key_name             = var.key_name
+#   security_group_id    = module.mt_security_group.security_group_id
+#   subnet_id            = module.vpc.public_subnet_ids[0]
+#   instance_name        = "Monitor-ec2"
+#   iam_instance_profile = module.ssm_iam_role.instance_profile_name
+#   tags                 = merge(var.tags, { Name = "Monitor" })
+# }
+
 module "alb" {
   source            = "./modules/alb"
   lb_name           = "alb"

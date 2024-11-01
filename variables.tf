@@ -50,7 +50,7 @@ variable "jenkins_ami" {
 }
 
 variable "instance_ami" {
-  description = "AMI ID for Frontend/Jenkins Instances"
+  description = "AMI ID for Frontend Instances"
   default     = "ami-062cf18d655c0b1e8"
 }
 
@@ -62,6 +62,11 @@ variable "be_ami" {
 variable "redis_ami" {
   description = "AMI ID for Redis (EC2) Instance"
   default     = "ami-01ce306e867ff466f"
+}
+
+variable "mt_ami" {
+  description = "AMI ID for Monitoring Instance"
+  default = "ami-"
 }
 
 variable "security_group_id" { 
