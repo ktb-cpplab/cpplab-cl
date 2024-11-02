@@ -21,6 +21,11 @@ mt_ami = "ami-040c33c6a51fd5d96"
 
 security_group_id = "sg-0123456789abcdef0"
 
+# Auto Scaling 그룹
+asg_desired_capacity = 0
+asg_max_size         = 0
+asg_min_size         = 0
+
 tags = {
   Name        = "MyInstance"
   Environment = "dev"

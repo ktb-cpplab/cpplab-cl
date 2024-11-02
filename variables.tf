@@ -89,4 +89,21 @@ variable "tags" {
   }
 }
 
+# Auto Scaling 그룹 변수
+variable "asg_desired_capacity" {
+  description = "Auto Scaling 그룹의 원하는 인스턴스 수"
+  type        = number
+  default     = 1
+}
 
+variable "asg_max_size" {
+  description = "Auto Scaling 그룹의 최대 인스턴스 수"
+  type        = number
+  default     = 2
+}
+
+variable "asg_min_size" {
+  description = "Auto Scaling 그룹의 최소 인스턴스 수"
+  type        = number
+  default     = 1
+}
