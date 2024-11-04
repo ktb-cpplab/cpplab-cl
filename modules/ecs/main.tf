@@ -4,20 +4,17 @@ resource "aws_ecs_task_definition" "this" {
   requires_compatibilities = ["EC2"]
   execution_role_arn       = var.execution_role_arn
 
-  container_definitions = jsonencode([{
-    name      = var.container_name
-    image     = var.container_image
-    memory    = var.memory
-    cpu       = var.cpu
-    essential = true
-    portMappings = [{
-      containerPort = var.container_port
-      hostPort      = var.host_port
-      protocol      = "tcp"
-    }]
-    
-    secrets = var.secrets
-  }])
+  container_definitions = jsonencode([
+    for container in var.containers : {
+      name         = container.name
+      image        = container.image
+      memory       = container.memory
+      cpu          = container.cpu
+      essential    = container.essential
+      portMappings = container.portMappings
+      secrets      = container.secrets
+    }
+  ])
 }
 
 resource "aws_ecs_service" "this" {
@@ -36,10 +33,13 @@ resource "aws_ecs_service" "this" {
     }
   }
 
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
+  dynamic "load_balancer" {
+    for_each = var.load_balancers
+    content {
+      target_group_arn = load_balancer.value.target_group_arn
+      container_name   = load_balancer.value.container_name
+      container_port   = load_balancer.value.container_port
+    }
   }
 }
 

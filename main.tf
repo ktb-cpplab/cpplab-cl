@@ -192,62 +192,116 @@ module "ecs_ai" {
   cluster_id                 = aws_ecs_cluster.this.id
   cluster_name               = aws_ecs_cluster.this.name
   task_family                = "ai-task-family"
-  container_name             = "ai-container"
-  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:latest"
-  memory                     = 512
-  cpu                        = 256
-  container_port             = 5000
-  host_port                  = 5000
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   target_group_arn           = module.alb.ai_target_group_arn
   service_name               = "my-ai-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn  # IAM 역할 ARN 전달
+  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+
+  containers = [
+    {
+      name      = "ai-container-1"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:peter-latest"
+      memory    = 512
+      cpu       = 256
+      essential = true
+      portMappings = [{
+        containerPort = 5000
+        hostPort      = 5000
+        protocol      = "tcp"
+      }]
+      secrets = []
+    },
+    {
+      name      = "ai-container-2"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:siomn-latest"
+      memory    = 512
+      cpu       = 256
+      essential = true
+      portMappings = [{
+        containerPort = 5001
+        hostPort      = 5001
+        protocol      = "tcp"
+      }]
+      secrets = []
+    }
+  ]
+
+  load_balancers = [
+    {
+      target_group_arn = module.alb.ai_target_group_arn
+      container_name   = "ai-container-1"
+      container_port   = 5000
+    },
+    {
+      target_group_arn = module.alb.ai_target_group_arn
+      container_name   = "ai-container-2"
+      container_port   = 5001
+    }
+  ]
 }
+
+
 # BE 파트
 module "ecs_be" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
   cluster_name               = aws_ecs_cluster.this.name
   task_family                = "be-task-family"
-  container_name             = "be-container"
-  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
-  memory                     = 512
-  cpu                        = 256
-  container_port             = 8080
-  host_port                  = 8080
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   target_group_arn           = module.alb.be_target_group_arn
   service_name               = "my-be-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn  # IAM 역할 ARN 전달
-  # Parameter 전달
-  secrets = [
+  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+
+  containers = [
     {
-      name      = "DB_URL"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_URL"
-    },
+      name      = "be-container"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
+      memory    = 512
+      cpu       = 256
+      essential = true
+      portMappings = [{
+        containerPort = 8080
+        hostPort      = 8080
+        protocol      = "tcp"
+      }]
+      secrets = [
+        {
+          name      = "DB_URL"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_URL"
+        },
+        {
+          name      = "DB_USERNAME"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/JWT_SECRET"
+        },
+        {
+          name      = "KAKAO_CLIENT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/KAKAO_CLIENT_SECRET"
+        },
+        {
+          name      = "NAVER_CLIENT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/NAVER_CLIENT_SECRET"
+        }
+      ]
+    }
+  ]
+
+  load_balancers = [
     {
-      name      = "DB_USERNAME"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
-    },
-    {
-      name      = "DB_PASSWORD"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
-    },
-    {
-      name      = "JWT_SECRET"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/JWT_SECRET"
-    },
-    {
-      name      = "KAKAO_CLIENT_SECRET"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/KAKAO_CLIENT_SECRET"
-    },
-    {
-      name      = "NAVER_CLIENT_SECRET"
-      valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/NAVER_CLIENT_SECRET"
+      target_group_arn = module.alb.be_target_group_arn
+      container_name   = "be-container"
+      container_port   = 8080
     }
   ]
 }
@@ -257,18 +311,36 @@ module "ecs_fe" {
   cluster_id                 = aws_ecs_cluster.this.id
   cluster_name               = aws_ecs_cluster.this.name
   task_family                = "fe-task-family"
-  container_name             = "fe-container"
-  container_image            = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
-  memory                     = 512
-  cpu                        = 256
-  container_port             = 3000
-  host_port                  = 3000
   desired_count              = 1
   subnet_ids                 = module.vpc.public_subnet_ids
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
   target_group_arn           = module.alb.fe_target_group_arn
   service_name               = "my-fe-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn  # IAM 역할 ARN 전달
+  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+
+  containers = [
+    {
+      name      = "fe-container"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
+      memory    = 512
+      cpu       = 256
+      essential = true
+      portMappings = [{
+        containerPort = 3000
+        hostPort      = 3000
+        protocol      = "tcp"
+      }]
+      secrets = []
+    }
+  ]
+
+  load_balancers = [
+    {
+      target_group_arn = module.alb.fe_target_group_arn
+      container_name   = "fe-container"
+      container_port   = 3000
+    }
+  ]
 }
 
 ########################################
@@ -319,7 +391,7 @@ module "rds_postgres" {
 
   # 고가용성 및 성능 설정
   multi_az                   = false                   # 멀티 AZ 설정 여부
-  storage_type               = "gp3"                   # 스토리지 유형 (기본: gp2)
+  storage_type               = "gp2"                   # 스토리지 유형 (기본: gp2)
   # max_allocated_storage      = 100                     # 최대 스토리지 크기 (자동 확장)
 
   # 태그 설정
