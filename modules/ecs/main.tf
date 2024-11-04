@@ -41,6 +41,14 @@ resource "aws_ecs_service" "this" {
       container_port   = load_balancer.value.container_port
     }
   }
+
+  dynamic "placement_constraints" {
+    for_each = var.placement_constraints
+    content {
+      type       = placement_constraints.value.type
+      expression = placement_constraints.value.expression
+    }
+  }
 }
 
 resource "aws_appautoscaling_target" "ecs_target" {

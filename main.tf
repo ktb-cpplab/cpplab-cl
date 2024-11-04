@@ -142,6 +142,7 @@ module "auto_scaling_be" {
   target_group_arns          = [module.alb.be_target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
+  ecs_instance_type           = "be"
   //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
@@ -160,6 +161,7 @@ module "auto_scaling_fe" {
   target_group_arns          = [module.alb.fe_target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Frontend"
+  ecs_instance_type           = "fe"
   //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
@@ -178,6 +180,7 @@ module "auto_scaling_ai" {
   target_group_arns          = [module.alb.ai_target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
+  ecs_instance_type           = "ai"
   //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
@@ -198,6 +201,12 @@ module "ecs_ai" {
   target_group_arn           = module.alb.ai_target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  placement_constraints = [
+    {
+      type       = "memberOf"
+      expression = "attribute:ecs.instance-type == fe"
+    }
+  ]
 
   containers = [
     {
@@ -256,6 +265,12 @@ module "ecs_be" {
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
+  placement_constraints = [
+    {
+      type       = "memberOf"
+      expression = "attribute:ecs.instance-type == fe"
+    }
+  ]
   containers = [
     {
       name      = "be-container"
@@ -318,6 +333,13 @@ module "ecs_fe" {
   service_name               = "my-fe-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
+  placement_constraints = [
+    {
+      type       = "memberOf"
+      expression = "attribute:ecs.instance-type == fe"
+    }
+  ]
+  
   containers = [
     {
       name      = "fe-container"

@@ -120,3 +120,12 @@ variable "scale_out_cooldown" {
   type        = number
   default     = 300
 }
+
+variable "placement_constraints" {
+  description = "ECS 서비스에 적용할 태스크 배치 제약 조건"
+  type = list(object({
+    type       = string
+    expression = string
+  }))
+  default = []
+}

@@ -24,6 +24,15 @@ resource "aws_launch_template" "this" {
       name = var.iam_instance_profile
     }
   }
+  # 태그 스펙ification 추가
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      "Name"              = var.tag_name
+      "ecs.instance-type" = var.ecs_instance_type
+    }
+  }
 }
 
 resource "aws_autoscaling_group" "this" {
