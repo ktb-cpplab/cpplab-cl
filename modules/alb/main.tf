@@ -132,7 +132,7 @@ resource "aws_lb_listener_rule" "be_rule" {
 
   condition {
     path_pattern {
-      values = ["/api/*"]  # /api로 시작하는 모든 경로
+      values = ["/api/*","/oauth2/*"]  # /api로 시작하는 모든 경로
     }
   }
 
