@@ -66,7 +66,7 @@ resource "aws_lb_target_group" "be" {
   deregistration_delay = var.deregistration_delay_time
 
   health_check {
-    path                = "/api/v1/auth/my"             # 헬스 체크 경로
+    path                = "/swagger-ui/index.html"             # 헬스 체크 경로
     interval            = 30
     timeout             = 5
     healthy_threshold   = 3
