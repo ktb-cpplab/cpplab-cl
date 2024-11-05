@@ -69,7 +69,7 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
     target_value       = 70
     scale_in_cooldown  = 300

@@ -9,6 +9,7 @@ key_name = "cpplab-keypair"
 
 instance_type = "t2.micro"
 be_instance_type = "t3a.medium"
+fe_instance_type = "t3a.small"
 nat_instance_type = "t2.micro"
 
 nat_ami = "ami-0e0ce674db551c1a5"

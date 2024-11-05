@@ -150,7 +150,7 @@ module "auto_scaling_fe" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-fe"
   instance_ami               = var.instance_ami
-  instance_type              = var.instance_type
+  instance_type              = var.fe_instance_type
   associate_public_ip_address = true
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
   subnet_ids                 = [module.vpc.public_subnet_ids[0], module.vpc.public_subnet_ids[1]]
@@ -201,17 +201,17 @@ module "ecs_ai" {
   target_group_arn           = module.alb.ai_target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-  placement_constraints = [
-    {
-      type       = "memberOf"
-      expression = "attribute:ecs.instance-type == fe"
-    }
-  ]
+  # placement_constraints = [
+  #   {
+  #     type       = "memberOf"
+  #     expression = "attribute:ecs.instance-type == fe"
+  #   }
+  # ]
 
   containers = [
     {
       name      = "ai-container-1"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:peter-latest"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
       memory    = 512
       cpu       = 256
       essential = true
@@ -224,7 +224,7 @@ module "ecs_ai" {
     },
     {
       name      = "ai-container-2"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:siomn-latest"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
       memory    = 512
       cpu       = 256
       essential = true
@@ -233,7 +233,12 @@ module "ecs_ai" {
         hostPort      = 5001
         protocol      = "tcp"
       }]
-      secrets = []
+      secrets = [
+        # {
+        #   name      = "UPSTAGE_API_KEY"
+        #   valueFrom = aws_ssm_parameter.upstage_api_key.arn
+        # }
+      ]
     }
   ]
 
@@ -244,7 +249,7 @@ module "ecs_ai" {
       container_port   = 5000
     },
     {
-      target_group_arn = module.alb.ai_target_group_arn
+      target_group_arn = module.alb.ai2_target_group_arn
       container_name   = "ai-container-2"
       container_port   = 5001
     }
@@ -265,12 +270,12 @@ module "ecs_be" {
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
-  placement_constraints = [
-    {
-      type       = "memberOf"
-      expression = "attribute:ecs.instance-type == fe"
-    }
-  ]
+  # placement_constraints = [
+  #   {
+  #     type       = "memberOf"
+  #     expression = "attribute:ecs.instance-type == fe"
+  #   }
+  # ]
   containers = [
     {
       name      = "be-container"
@@ -333,19 +338,19 @@ module "ecs_fe" {
   service_name               = "my-fe-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
-  placement_constraints = [
-    {
-      type       = "memberOf"
-      expression = "attribute:ecs.instance-type == fe"
-    }
-  ]
-  
+  # placement_constraints = [
+  #   {
+  #     type       = "memberOf"
+  #     expression = "attribute:ecs.instance-type == fe"
+  #   }
+  # ]
+
   containers = [
     {
       name      = "fe-container"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
-      memory    = 512
-      cpu       = 256
+      memory    = 256
+      cpu       = 128
       essential = true
       portMappings = [{
         containerPort = 3000
