@@ -43,7 +43,7 @@ resource "aws_lb_target_group" "fe" {
   port                 = 3000                       # 프론트엔드 서비스 포트
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
-  target_type          = "instance"
+  target_type          = "ip"
   deregistration_delay = var.deregistration_delay_time
 
   health_check {
@@ -62,7 +62,7 @@ resource "aws_lb_target_group" "be" {
   port                 = 8080                       # 백엔드 서비스 포트
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
-  target_type          = "instance"
+  target_type          = "ip"
   deregistration_delay = var.deregistration_delay_time
 
   health_check {
@@ -81,7 +81,7 @@ resource "aws_lb_target_group" "ai" {
   port                 = 5000                       # AI 서비스 포트
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
-  target_type          = "instance"
+  target_type          = "ip"
   deregistration_delay = var.deregistration_delay_time
 
   health_check {

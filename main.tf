@@ -33,10 +33,28 @@ module "ssm_iam_role" {
     "arn:aws:iam::aws:policy/AutoScalingFullAccess",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
+  
+  # inline_policies = {
+  #   ecs_deployment_policy = jsonencode({
+  #     Version = "2012-10-17",
+  #     Statement = [
+  #       {
+  #         Effect = "Allow",
+  #         Action = [
+  #           "ecs:RegisterTaskDefinition",
+  #           "ecs:UpdateService"
+  #         ],
+  #         Resource = "*"
+  #       }
+  #     ]
+  #   })
+  # }
+  
   tags = {
     Environment = "dev"
   }
 }
+
 resource "aws_iam_role" "ecs_execution_role" {
   name               = "ecs-execution-role"
   assume_role_policy = jsonencode({
@@ -217,7 +235,7 @@ module "ecs_ai" {
       essential = true
       portMappings = [{
         containerPort = 5000
-        hostPort      = 5000
+        hostPort      = 0
         protocol      = "tcp"
       }]
       secrets = [
@@ -239,7 +257,7 @@ module "ecs_ai" {
       essential = true
       portMappings = [{
         containerPort = 5001
-        hostPort      = 5001
+        hostPort      = 0
         protocol      = "tcp"
       }]
       secrets = [
@@ -318,7 +336,7 @@ module "ecs_be" {
       essential = true
       portMappings = [{
         containerPort = 8080
-        hostPort      = 8080
+        hostPort      = 0
         protocol      = "tcp"
       }]
       secrets = [
@@ -387,7 +405,7 @@ module "ecs_fe" {
       essential = true
       portMappings = [{
         containerPort = 3000
-        hostPort      = 3000
+        hostPort      = 0
         protocol      = "tcp"
       }]
       secrets = []
