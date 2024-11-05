@@ -234,10 +234,34 @@ module "ecs_ai" {
         protocol      = "tcp"
       }]
       secrets = [
-        # {
-        #   name      = "UPSTAGE_API_KEY"
-        #   valueFrom = aws_ssm_parameter.upstage_api_key.arn
-        # }
+        {
+          name      = "HUGGINGFACEHUB_API_TOKEN"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/HUGGINGFACEHUB_API_TOKEN"
+        },
+        {
+          name      = "LANGCHAIN_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_API_KEY"
+        },
+        {
+          name      = "LANGCHAIN_ENDPOINT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_ENDPOINT"
+        },
+        {
+          name      = "LANGCHAIN_PROJECT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_PROJECT"
+        },
+        {
+          name      = "LANGCHAIN_TRACING_V2"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_TRACING_V2"
+        },
+        {
+          name      = "OPENAI_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/OPENAI_API_KEY"
+        },
+        {
+          name      = "UPSTAGE_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/UPSTAGE_API_KEY"
+        }
       ]
     }
   ]
