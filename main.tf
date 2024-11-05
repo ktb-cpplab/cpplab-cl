@@ -169,7 +169,7 @@ module "auto_scaling_ai" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-ai"
   instance_ami               = var.instance_ami
-  instance_type              = var.instance_type
+  instance_type              = var.fe_instance_type
   associate_public_ip_address = false
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
