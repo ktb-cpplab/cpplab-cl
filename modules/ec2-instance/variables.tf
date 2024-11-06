@@ -38,3 +38,9 @@ variable "tags" {
   description = "Tags for the EC2 instance"
   type        = map(string)
 }
+
+variable "root_volume_size" {
+  description = "The size of the root EBS volume in GB"
+  type        = number
+  default     = 20  # 기본값을 30GB로 설정
+}

@@ -104,7 +104,9 @@ module "jenkins_instance" {
   subnet_id            = module.vpc.private_subnet_ids[0]
   instance_name        = "Jenkins"
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  root_volume_size     = 30
   tags                 = merge(var.tags, { Name = "Jenkins" })
+
 }
 
 resource "aws_lb_target_group_attachment" "example" {
@@ -229,7 +231,7 @@ module "ecs_ai" {
       essential = true
       portMappings = [{
         containerPort = 5000
-        hostPort      = 0
+        hostPort      = 5000
         protocol      = "tcp"
       }]
       secrets = [
@@ -263,7 +265,7 @@ module "ecs_ai" {
       essential = true
       portMappings = [{
         containerPort = 5001
-        hostPort      = 0
+        hostPort      = 5001
         protocol      = "tcp"
       }]
       secrets = [
@@ -336,7 +338,7 @@ module "ecs_be" {
       essential = true
       portMappings = [{
         containerPort = 8080
-        hostPort      = 0
+        hostPort      = 8080
         protocol      = "tcp"
       }]
       secrets = [
@@ -399,7 +401,7 @@ module "ecs_fe" {
       essential = true
       portMappings = [{
         containerPort = 3000
-        hostPort      = 0
+        hostPort      = 3000
         protocol      = "tcp"
       }]
       secrets = []
