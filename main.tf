@@ -204,7 +204,7 @@ module "ecs_ai" {
   # placement_constraints = [
   #   {
   #     type       = "memberOf"
-  #     expression = "attribute:ecs.instance-type == fe"
+  #     expression = "attribute:ecs.instance-type == ai"
   #   }
   # ]
 
@@ -220,7 +220,16 @@ module "ecs_ai" {
         hostPort      = 5000
         protocol      = "tcp"
       }]
-      secrets = []
+      secrets = [
+        {
+          name      = "DB_URL"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_URL"
+        },
+        {
+          name      = "MODEL_PATH"
+          valueFrom = "/app/models"
+        }
+      ]
     },
     {
       name      = "ai-container-2"
@@ -297,7 +306,7 @@ module "ecs_be" {
   # placement_constraints = [
   #   {
   #     type       = "memberOf"
-  #     expression = "attribute:ecs.instance-type == fe"
+  #     expression = "attribute:ecs.instance-type == be"
   #   }
   # ]
   containers = [
