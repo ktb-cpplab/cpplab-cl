@@ -63,3 +63,8 @@ variable "iam_instance_profile" {
   type        = string
   default     = null  # 기본값을 null로 설정
 }
+
+variable "ecs_instance_type" {
+  description = "ECS 인스턴스 타입을 지정 (fe, be, ai 등)"
+  type        = string
+}

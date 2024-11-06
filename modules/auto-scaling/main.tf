@@ -24,6 +24,15 @@ resource "aws_launch_template" "this" {
       name = var.iam_instance_profile
     }
   }
+  # 태그 스펙ification 추가
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      "Name"              = var.tag_name
+      "ecs.instance-type" = var.ecs_instance_type
+    }
+  }
 }
 
 resource "aws_autoscaling_group" "this" {
@@ -41,5 +50,20 @@ resource "aws_autoscaling_group" "this" {
     key                 = "Name"
     value               = var.tag_name
     propagate_at_launch = true
+  }
+}
+
+# ASG에 CPU 사용률 기반 Target Tracking Policy 추가
+resource "aws_autoscaling_policy" "cpu_target_tracking" {
+  autoscaling_group_name = aws_autoscaling_group.this.name
+  name                   = "cpu-target-tracking-policy"
+  policy_type            = "TargetTrackingScaling"
+  estimated_instance_warmup = 300  # 인스턴스가 추가된 후 안정화되는 데 필요한 시간 (초)
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"  # ASG의 평균 CPU 사용률 기반
+    }
+    target_value = 70.0  # 목표 CPU 사용률 (%)
   }
 }

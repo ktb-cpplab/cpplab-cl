@@ -1,5 +1,65 @@
 # security_groups.tf
 
+# Monitor 보안 그룹 모듈
+module "mt_security_group" {
+  source        = "./modules/security-group"
+  name          = "mt-security-group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      from_port   = 3000  #grafana
+      to_port     = 3000
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
+
+# Redis 보안 그룹 모듈
+module "redis_security_group" {
+  source        = "./modules/security-group"
+  name          = "redis-security-group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port   = 6379
+      to_port     = 6379
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_be_security_group.security_group_id]
+    },
+    {
+      from_port   = 6379
+      to_port     = 6379
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_ai_security_group.security_group_id]
+    }
+  ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
+
 # Jenkins 보안 그룹 모듈
 module "jenkins_security_group" {
   source        = "./modules/security-group"
@@ -148,6 +208,12 @@ module "auto_scaling_ai_security_group" {
       to_port         = 5000
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 5001
+      to_port         = 5001
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
     }
   ]
 
@@ -200,6 +266,39 @@ module "nat_security_group" {
 
   egress_rules = [
     # 모든 아웃바운드 트래픽 허용
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
+
+
+#PostgreSQL 보안그룹
+
+module "postgres_security_group" {
+  source        = "./modules/security-group"
+  name          = "postgres_security_group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_be_security_group.security_group_id]
+    },
+    {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      security_groups = [module.auto_scaling_ai_security_group.security_group_id]
+    }
+  ]
+
+  egress_rules = [
     {
       from_port   = 0
       to_port     = 0

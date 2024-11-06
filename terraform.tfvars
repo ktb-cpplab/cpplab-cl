@@ -9,13 +9,23 @@ key_name = "cpplab-keypair"
 
 instance_type = "t2.micro"
 be_instance_type = "t3a.medium"
+fe_instance_type = "t3a.small"
 nat_instance_type = "t2.micro"
 
 nat_ami = "ami-0e0ce674db551c1a5"
 instance_ami = "ami-0e0a3f6889d16c659"  # docker 설치된 ami
 jenkins_ami = "ami-0185cfa58cccb3358"   # jenkins ami (수정완료)
+be_ami = "ami-008826d9fbd497026"
+redis_ami = "ami-01ce306e867ff466f"
+mt_ami = "ami-040c33c6a51fd5d96"
+
 
 security_group_id = "sg-0123456789abcdef0"
+
+# Auto Scaling 그룹
+asg_desired_capacity = 1
+asg_max_size         = 2
+asg_min_size         = 1
 
 tags = {
   Name        = "MyInstance"

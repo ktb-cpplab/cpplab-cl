@@ -39,6 +39,11 @@ variable "be_instance_type" {
   default     = "t3a.medium"
 }
 
+variable "fe_instance_type" {
+  description = "Default instance type"
+  default     = "t2.meicro"
+}
+
 variable "nat_ami" {
   description = "AMI ID for NAT Instance"
   default     = "ami-0e0ce674db551c1a5"
@@ -50,8 +55,23 @@ variable "jenkins_ami" {
 }
 
 variable "instance_ami" {
-  description = "AMI ID for Backend/Frontend/Jenkins Instances"
+  description = "AMI ID for Frontend Instances"
   default     = "ami-062cf18d655c0b1e8"
+}
+
+variable "be_ami" {
+  description = "AMI ID for Backend Instances"
+  default     = "ami-008826d9fbd497026"
+}
+
+variable "redis_ami" {
+  description = "AMI ID for Redis (EC2) Instance"
+  default     = "ami-01ce306e867ff466f"
+}
+
+variable "mt_ami" {
+  description = "AMI ID for Monitoring Instance"
+  default = "ami-"
 }
 
 variable "security_group_id" { 
@@ -74,4 +94,21 @@ variable "tags" {
   }
 }
 
+# Auto Scaling 그룹 변수
+variable "asg_desired_capacity" {
+  description = "Auto Scaling 그룹의 원하는 인스턴스 수"
+  type        = number
+  default     = 1
+}
 
+variable "asg_max_size" {
+  description = "Auto Scaling 그룹의 최대 인스턴스 수"
+  type        = number
+  default     = 2
+}
+
+variable "asg_min_size" {
+  description = "Auto Scaling 그룹의 최소 인스턴스 수"
+  type        = number
+  default     = 1
+}
