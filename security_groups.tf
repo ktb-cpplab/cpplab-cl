@@ -208,6 +208,12 @@ module "auto_scaling_ai_security_group" {
       to_port         = 5000
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 5001
+      to_port         = 5001
+      protocol        = "tcp"
+      security_groups = [module.alb_security_group.security_group_id]
     }
   ]
 
