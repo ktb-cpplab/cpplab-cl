@@ -149,7 +149,7 @@ resource "aws_lb_listener_rule" "ai_rule" {
 
   condition {
     path_pattern {
-      values = ["/ai/genproject"]  # /ai로 시작하는 모든 경로
+      values = ["/ai/recommend"]  # /ai로 시작하는 모든 경로
     }
   }
 
@@ -166,7 +166,7 @@ resource "aws_lb_listener_rule" "ai2_rule" {
 
   condition {
     path_pattern {
-      values = ["/ai/recommend"]  # /ai2로 시작하는 모든 경로
+      values = ["/ai/genproject"]  # /ai2로 시작하는 모든 경로
     }
   }
 

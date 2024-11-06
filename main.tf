@@ -219,12 +219,6 @@ module "ecs_ai" {
   target_group_arn           = module.alb.ai_target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-  # placement_constraints = [
-  #   {
-  #     type       = "memberOf"
-  #     expression = "attribute:ecs.instance-type == ai"
-  #   }
-  # ]
 
   containers = [
     {
@@ -245,7 +239,19 @@ module "ecs_ai" {
         },
         {
           name      = "MODEL_PATH"
-          valueFrom = "/app/models"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/model/path"
+        },
+        {
+          name      = "DB_NAME"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/db/name"
+        },
+        {
+          name      = "DB_USER"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
         }
       ]
     },
@@ -321,12 +327,6 @@ module "ecs_be" {
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
-  # placement_constraints = [
-  #   {
-  #     type       = "memberOf"
-  #     expression = "attribute:ecs.instance-type == be"
-  #   }
-  # ]
   containers = [
     {
       name      = "be-container"
@@ -389,12 +389,6 @@ module "ecs_fe" {
   service_name               = "my-fe-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
 
-  # placement_constraints = [
-  #   {
-  #     type       = "memberOf"
-  #     expression = "attribute:ecs.instance-type == fe"
-  #   }
-  # ]
 
   containers = [
     {
