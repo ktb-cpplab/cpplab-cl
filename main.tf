@@ -237,7 +237,7 @@ module "ecs_ai" {
       secrets = [
         {
           name      = "DB_URL"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_URL"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_url"
         },
         {
           name      = "MODEL_PATH"
