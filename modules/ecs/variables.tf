@@ -129,3 +129,8 @@ variable "placement_constraints" {
   }))
   default = []
 }
+
+variable "part_capacity_provider" {
+  description = "각 서비스에 할당될 용량 공급자 구분"
+  type = string
+}

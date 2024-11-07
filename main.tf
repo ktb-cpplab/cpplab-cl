@@ -208,6 +208,72 @@ resource "aws_ecs_cluster" "this" {
   name = "cpplab-ecs-cluster"  # 클러스터 이름
 }
 
+#########################
+# AI-1 서비스용 Capacity Provider 생성
+resource "aws_ecs_capacity_provider" "ai_capacity_provider" {
+  name = "ai-capacity-provider"  # Capacity Provider 이름
+
+  # Capacity Provider에 연계할 Auto Scaling Group 설정
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = module.auto_scaling_ai.asg_arn  # AI 서비스에 할당된 ASG의 ARN
+    managed_termination_protection = "ENABLED"  # ASG 인스턴스 보호 설정, 작업 중지 시 인스턴스 종료 방지
+
+    # Capacity Provider의 자동 스케일링 관리 설정
+    managed_scaling {
+      maximum_scaling_step_size = 1    # 스케일링 시 최대 EC2 인스턴스 수 증가 단위
+      minimum_scaling_step_size = 1    # 스케일링 시 최소 EC2 인스턴스 수 증가 단위
+      status                    = "ENABLED"  # 스케일링 활성화 상태
+      target_capacity           = 100        # 목표 사용률 (100%에 가까울수록 높은 사용률)
+    }
+  }
+}
+
+# BE 서비스용 Capacity Provider 생성
+resource "aws_ecs_capacity_provider" "be_capacity_provider" {
+  name = "be-capacity-provider"  # Capacity Provider 이름
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = module.auto_scaling_be.asg_arn  # BE 서비스에 할당된 ASG의 ARN
+    managed_termination_protection = "ENABLED"  # ASG 인스턴스 보호 설정
+
+    managed_scaling {
+      maximum_scaling_step_size = 1
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+}
+
+# FE 서비스용 Capacity Provider 생성
+resource "aws_ecs_capacity_provider" "fe_capacity_provider" {
+  name = "fe-capacity-provider"  # Capacity Provider 이름
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = module.auto_scaling_fe.asg_arn  # FE 서비스에 할당된 ASG의 ARN
+    managed_termination_protection = "ENABLED"
+
+    managed_scaling {
+      maximum_scaling_step_size = 1
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+}
+
+# 생성된 Capacity Provider들을 ECS 클러스터에 연결
+resource "aws_ecs_cluster_capacity_providers" "cluster_providers" {
+  cluster_name       = aws_ecs_cluster.this.name  # ECS 클러스터 이름
+  capacity_providers = [
+    aws_ecs_capacity_provider.ai_capacity_provider.name,
+    aws_ecs_capacity_provider.be_capacity_provider.name,
+    aws_ecs_capacity_provider.fe_capacity_provider.name
+  ]
+}
+#########################
+
+
 # ECS 모듈 호출
 # AI 파트
 module "ecs_ai" {
@@ -221,6 +287,7 @@ module "ecs_ai" {
   target_group_arn           = module.alb.ai_target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  part_capacity_provider     = aws_ecs_capacity_provider.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
 
   containers = [
     {
@@ -254,6 +321,10 @@ module "ecs_ai" {
         {
           name      = "DB_PASSWORD"
           valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
+        },
+        {
+          name      = "DB_PORT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_port"
         }
       ]
     },
@@ -328,6 +399,7 @@ module "ecs_be" {
   target_group_arn           = module.alb.be_target_group_arn
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  part_capacity_provider     = aws_ecs_capacity_provider.be_capacity_provider.name  # BE 서비스의 Capacity Provider
 
   containers = [
     {
@@ -390,7 +462,7 @@ module "ecs_fe" {
   target_group_arn           = module.alb.fe_target_group_arn
   service_name               = "my-fe-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-
+  part_capacity_provider     = aws_ecs_capacity_provider.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
 
   containers = [
     {

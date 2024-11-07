@@ -41,6 +41,8 @@ resource "aws_autoscaling_group" "this" {
   min_size             = var.min_size
   vpc_zone_identifier  = var.subnet_ids  // 여러 서브넷이 포함된 리스트
   target_group_arns    = var.target_group_arns
+  protect_from_scale_in = true
+  
   launch_template {
     id      = aws_launch_template.this.id
     version = "$Latest"
