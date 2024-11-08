@@ -28,7 +28,16 @@ resource "aws_lb_listener" "jenkins_listener" {
   }
 }
 
-# FE, BE, AI 로드밸런서
+# FE 로드밸런서
+resource "aws_lb" "frontend" {
+  name               = "${var.lb_name}-front"  # 메인 ALB 이름
+  internal           = var.internal
+  load_balancer_type = "application"
+  security_groups    = var.security_group_ids
+  subnets            = var.subnet_ids
+}
+
+# BE, AI 로드밸런서
 resource "aws_lb" "main_lb" {
   name               = "${var.lb_name}-main"  # 메인 ALB 이름
   internal           = var.internal
@@ -113,7 +122,19 @@ resource "aws_lb_target_group" "ai2" {
   }
 }
 
-# ALB의 HTTP 리스너 설정
+# FE ALB의 HTTP 리스너 설정
+resource "aws_lb_listener" "fornt_listner" {
+  load_balancer_arn = aws_lb.frontend.arn  # 메인 ALB의 ARN
+  port              = 80                  # ALB에서 트래픽 수신 포트
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.fe.arn  # 기본 프론트엔드 타겟 그룹
+  }
+}
+
+# BE ALB의 HTTP 리스너 설정
 resource "aws_lb_listener" "main_listener" {
   load_balancer_arn = aws_lb.main_lb.arn  # 메인 ALB의 ARN
   port              = 80                  # ALB에서 트래픽 수신 포트
@@ -121,7 +142,7 @@ resource "aws_lb_listener" "main_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.fe.arn  # 기본 프론트엔드 타겟 그룹
+    target_group_arn = aws_lb_target_group.be.arn  # 기본 프론트엔드 타겟 그룹
   }
 }
 
@@ -132,7 +153,7 @@ resource "aws_lb_listener_rule" "be_rule" {
 
   condition {
     path_pattern {
-      values = ["/api/*","/oauth2/*"]  # /api로 시작하는 모든 경로
+      values = ["/api/*","/oauth2/*","/login/*"]  # /api로 시작하는 모든 경로
     }
   }
 

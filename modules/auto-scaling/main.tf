@@ -41,6 +41,9 @@ resource "aws_autoscaling_group" "this" {
   min_size             = var.min_size
   vpc_zone_identifier  = var.subnet_ids  // 여러 서브넷이 포함된 리스트
   target_group_arns    = var.target_group_arns
+  # protect_from_scale_in 설정이 true로 되어 있으면 인스턴스가 보호되기 때문에 scale-in 이벤트에서 인스턴스가 종료되지 않습니다.
+  protect_from_scale_in = false
+  
   launch_template {
     id      = aws_launch_template.this.id
     version = "$Latest"
@@ -53,17 +56,33 @@ resource "aws_autoscaling_group" "this" {
   }
 }
 
-# ASG에 CPU 사용률 기반 Target Tracking Policy 추가
-resource "aws_autoscaling_policy" "cpu_target_tracking" {
+# # ASG에 CPU 사용률 기반 Target Tracking Policy 추가
+# resource "aws_autoscaling_policy" "cpu_target_tracking" {
+#   autoscaling_group_name = aws_autoscaling_group.this.name
+#   name                   = "cpu-target-tracking-policy"
+#   policy_type            = "TargetTrackingScaling"
+#   estimated_instance_warmup = 300  # 인스턴스가 추가된 후 안정화되는 데 필요한 시간 (초)
+
+#   target_tracking_configuration {
+#     predefined_metric_specification {
+#       predefined_metric_type = "ASGAverageCPUUtilization"  # ASG의 평균 CPU 사용률 기반
+#     }
+#     target_value = 70.0  # 목표 CPU 사용률 (%)
+#   }
+# }
+
+#  CPU 사용률이 특정 임계값 이하로 떨어질 때 인스턴스를 축소하도록 설정
+resource "aws_autoscaling_policy" "scale_in_policy" {
   autoscaling_group_name = aws_autoscaling_group.this.name
-  name                   = "cpu-target-tracking-policy"
+  name                   = "cpu-scale-in-policy"
   policy_type            = "TargetTrackingScaling"
-  estimated_instance_warmup = 300  # 인스턴스가 추가된 후 안정화되는 데 필요한 시간 (초)
+  estimated_instance_warmup = 300  // 인스턴스가 추가된 후 안정화되는 데 필요한 시간 (초)
 
   target_tracking_configuration {
     predefined_metric_specification {
-      predefined_metric_type = "ASGAverageCPUUtilization"  # ASG의 평균 CPU 사용률 기반
+      predefined_metric_type = "ASGAverageCPUUtilization"  // 평균 CPU 사용률에 기반
     }
-    target_value = 70.0  # 목표 CPU 사용률 (%)
+    target_value = 30.0  // 목표 CPU 사용률 (%). 이 임계값 아래로 떨어지면 축소
+    #scale_in_cooldown = 300  // 축소 후 대기 시간 (초)
   }
 }
