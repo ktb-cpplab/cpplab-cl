@@ -24,13 +24,23 @@ resource "aws_ecs_service" "this" {
   desired_count   = var.desired_count
   #launch_type     = "EC2"
 
-  ###########
+  
   # 각 서비스에 지정된 Capacity Provider 사용 설정
   capacity_provider_strategy {
     capacity_provider = var.part_capacity_provider  # 각 서비스용 Capacity Provider
     weight            = 1  # 해당 Capacity Provider에 부여하는 가중치
   }
-  ###########
+  
+  # # Deployment configuration 추가
+  # deployment_controller {
+  #   type = "ECS"  // 이 부분이 다른 값일 경우, `deployment_configuration` 사용 불가
+  # }
+
+  # # deployment_configuration은 `ECS` 타입에서만 사용 가능
+  # deployment_configuration {
+  #   maximum_percent         = 200
+  #   minimum_healthy_percent = 50
+  # }
 
   dynamic "network_configuration" {
     for_each = var.network_mode == "awsvpc" ? [1] : []
@@ -82,5 +92,23 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
     target_value       = 70
     scale_in_cooldown  = 300
     scale_out_cooldown = 300
+  }
+}
+
+# scale-in 프로세스 모니터링
+resource "aws_appautoscaling_policy" "scale_in_policy" {
+  name               = "${var.service_name}-scale-in"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = 30  // CPU 사용률이 30% 이하로 떨어지면 축소
+    scale_in_cooldown  = 300 // 축소 후 대기 시간 (초)
+    scale_out_cooldown = 300 // 확장 후 대기 시간 (초)
   }
 }
