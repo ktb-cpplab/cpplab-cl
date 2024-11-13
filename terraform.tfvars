@@ -9,6 +9,7 @@ key_name = "cpplab-keypair"
 
 instance_type = "t2.micro"
 be_instance_type = "t3a.medium"
+ai_instance_type = "t3a.large"
 fe_instance_type = "t3a.small"
 nat_instance_type = "t2.micro"
 
@@ -18,7 +19,6 @@ jenkins_ami = "ami-0185cfa58cccb3358"   # jenkins ami (수정완료)
 be_ami = "ami-008826d9fbd497026"
 redis_ami = "ami-01ce306e867ff466f"
 mt_ami = "ami-040c33c6a51fd5d96"
-
 
 security_group_id = "sg-0123456789abcdef0"
 

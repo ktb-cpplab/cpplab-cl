@@ -42,7 +42,7 @@ resource "aws_autoscaling_group" "this" {
   vpc_zone_identifier  = var.subnet_ids  // 여러 서브넷이 포함된 리스트
   target_group_arns    = var.target_group_arns
   # protect_from_scale_in 설정이 true로 되어 있으면 인스턴스가 보호되기 때문에 scale-in 이벤트에서 인스턴스가 종료되지 않습니다.
-  protect_from_scale_in = false
+  protect_from_scale_in = true
   
   launch_template {
     id      = aws_launch_template.this.id
