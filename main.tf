@@ -33,23 +33,6 @@ module "ssm_iam_role" {
     "arn:aws:iam::aws:policy/AutoScalingFullAccess",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
-  
-  # inline_policies = {
-  #   ecs_deployment_policy = jsonencode({
-  #     Version = "2012-10-17",
-  #     Statement = [
-  #       {
-  #         Effect = "Allow",
-  #         Action = [
-  #           "ecs:RegisterTaskDefinition",
-  #           "ecs:UpdateService"
-  #         ],
-  #         Resource = "*"
-  #       }
-  #     ]
-  #   })
-  # }
-  
   tags = {
     Environment = "dev"
   }
@@ -109,11 +92,6 @@ module "jenkins_instance" {
 
 }
 
-resource "aws_lb_target_group_attachment" "example" {
-  target_group_arn = module.alb.jenkins-target-group-arn   # ALB 타겟 그룹의 ARN을 변수로 받음
-  target_id        = module.jenkins_instance.instance_id
-}
-
 module "redis_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.redis_ami
@@ -138,15 +116,6 @@ module "Monitor_instance" {
   tags                 = merge(var.tags, { Name = "Monitor" })
 }
 
-module "alb" {
-  source            = "./modules/alb"
-  lb_name           = "alb"
-  internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
-  vpc_id            = module.vpc.vpc_id
-}
-
 module "auto_scaling_be" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-be"
@@ -159,11 +128,10 @@ module "auto_scaling_be" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.be_target_group_arn]
+  target_group_arns          = [module.tg_be.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
   ecs_instance_type           = "be"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_fe" {
@@ -178,11 +146,10 @@ module "auto_scaling_fe" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.fe_target_group_arn]
+  target_group_arns          = [module.tg_fe.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Frontend"
   ecs_instance_type           = "fe"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 module "auto_scaling_ai" {
@@ -197,11 +164,10 @@ module "auto_scaling_ai" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.ai_target_group_arn]
+  target_group_arns          = [module.tg_ai1.target_group_arn, module.tg_ai2.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
   ecs_instance_type           = "ai"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
 }
 
 resource "aws_ecs_cluster" "this" {
@@ -284,7 +250,7 @@ module "ecs_ai" {
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
-  target_group_arn           = module.alb.ai_target_group_arn
+  target_group_arn           = module.tg_ai1.target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
   part_capacity_provider     = aws_ecs_capacity_provider.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
@@ -374,12 +340,12 @@ module "ecs_ai" {
 
   load_balancers = [
     {
-      target_group_arn = module.alb.ai_target_group_arn
+      target_group_arn = module.tg_ai1.target_group_arn
       container_name   = "ai-container-1"
       container_port   = 5000
     },
     {
-      target_group_arn = module.alb.ai2_target_group_arn
+      target_group_arn = module.tg_ai2.target_group_arn
       container_name   = "ai-container-2"
       container_port   = 5001
     }
@@ -396,7 +362,7 @@ module "ecs_be" {
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
-  target_group_arn           = module.alb.be_target_group_arn
+  target_group_arn           = module.tg_be.target_group_arn
   service_name               = "my-be-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
   part_capacity_provider     = aws_ecs_capacity_provider.be_capacity_provider.name  # BE 서비스의 Capacity Provider
@@ -444,7 +410,7 @@ module "ecs_be" {
 
   load_balancers = [
     {
-      target_group_arn = module.alb.be_target_group_arn
+      target_group_arn = module.tg_be.target_group_arn
       container_name   = "be-container"
       container_port   = 8080
     }
@@ -459,7 +425,7 @@ module "ecs_fe" {
   desired_count              = 1
   subnet_ids                 = module.vpc.public_subnet_ids
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
-  target_group_arn           = module.alb.fe_target_group_arn
+  target_group_arn           = module.tg_fe.target_group_arn
   service_name               = "my-fe-service"
   execution_role_arn         = aws_iam_role.ecs_execution_role.arn
   part_capacity_provider     = aws_ecs_capacity_provider.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
@@ -482,7 +448,7 @@ module "ecs_fe" {
 
   load_balancers = [
     {
-      target_group_arn = module.alb.fe_target_group_arn
+      target_group_arn = module.tg_fe.target_group_arn
       container_name   = "fe-container"
       container_port   = 3000
     }
