@@ -98,7 +98,7 @@ resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
-  instance_type        = "t3a.medium"
+  instance_type        = "t3a.large"
   key_name             = var.key_name
   security_group_id    = module.jenkins_security_group.security_group_id
   subnet_id            = module.vpc.private_subnet_ids[0]
@@ -189,7 +189,7 @@ module "auto_scaling_ai" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-ai"
   instance_ami               = var.instance_ami
-  instance_type              = var.fe_instance_type
+  instance_type              = var.ai_instance_type
   associate_public_ip_address = false
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   subnet_ids                 = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
@@ -293,8 +293,8 @@ module "ecs_ai" {
     {
       name      = "ai-container-1"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
-      memory    = 512
-      cpu       = 256
+      memory    = 1024
+      cpu       = 512
       essential = true
       portMappings = [{
         containerPort = 5000
@@ -331,8 +331,8 @@ module "ecs_ai" {
     {
       name      = "ai-container-2"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
-      memory    = 512
-      cpu       = 256
+      memory    = 2096
+      cpu       = 512
       essential = true
       portMappings = [{
         containerPort = 5001
