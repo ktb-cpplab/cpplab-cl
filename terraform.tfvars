@@ -32,3 +32,5 @@ tags = {
   Environment = "dev"
   ManagedBy   = "terraform"
 }
+
+certificate_arn = "arn:aws:acm:ap-northeast-2:891612581533:certificate/a36ed071-ed0f-428c-b18f-0fa42f5f0dd4"
