@@ -1,6 +1,6 @@
 module "ssm_iam_role" {
-  source            = "./modules/iam-role"
-  role_name         = "ssm-ec2-role"
+  source             = "./modules/iam-role"
+  role_name          = "ssm-ec2-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -14,18 +14,22 @@ module "ssm_iam_role" {
   policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
     "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-    "arn:aws:iam::aws:policy/AutoScalingFullAccess",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  ]
+  policy_statements = [
+    {
+      Effect   = "Allow",
+      Action   = ["autoscaling:DescribeAutoScalingGroups", "autoscaling:UpdateAutoScalingGroup"],
+      Resource = "*"
+    }
   ]
   tags = {
     Environment = "dev"
   }
 }
 
-resource "aws_iam_role" "ecs_execution_role" {
-  name               = "ecs-execution-role"
+module "ecs_execution_role" {
+  source             = "./modules/iam-role"
+  role_name          = "ecs-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -36,30 +40,18 @@ resource "aws_iam_role" "ecs_execution_role" {
       }
     }]
   })
+  policy_statements = [
+    {
+      Effect   = "Allow",
+      Action   = ["ecr:GetAuthorizationToken", "ecr:BatchCheckLayerAvailability"],
+      Resource = "arn:aws:ecr:ap-northeast-2:account-id:repository/repository-name"
+    }
+  ]
+  tags = {
+    Environment = "prod"
+  }
 }
 
-resource "aws_iam_policy" "parameter_access_policy" {
-  name        = "ParameterAccessPolicy"
-  description = "Allows ECS tasks to access AWS parameter Manager"
-  
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ssm:GetParameter",
-        "ssm:GetParameters"
-      ],
-      Resource = "*"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
-  policy_arn = aws_iam_policy.parameter_access_policy.arn
-  role       = aws_iam_role.ecs_execution_role.name
+output "ecs_execution_role_arn" {
+  value = module.ecs_execution_role.role_arn
 }

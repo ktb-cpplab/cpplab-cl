@@ -12,72 +12,6 @@ module "vpc" {
 }
 
 
-module "ssm_iam_role" {
-  source            = "./modules/iam-role"
-  role_name         = "ssm-ec2-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-  })
-  policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-    "arn:aws:iam::aws:policy/AutoScalingFullAccess",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  ]
-  tags = {
-    Environment = "dev"
-  }
-}
-
-resource "aws_iam_role" "ecs_execution_role" {
-  name               = "ecs-execution-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-}
-
-resource "aws_iam_policy" "parameter_access_policy" {
-  name        = "ParameterAccessPolicy"
-  description = "Allows ECS tasks to access AWS parameter Manager"
-  
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ssm:GetParameter",
-        "ssm:GetParameters"
-      ],
-      Resource = "*"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
-  policy_arn = aws_iam_policy.parameter_access_policy.arn
-  role       = aws_iam_role.ecs_execution_role.name
-}
-
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
@@ -89,7 +23,6 @@ module "jenkins_instance" {
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   root_volume_size     = 30
   tags                 = merge(var.tags, { Name = "Jenkins" })
-
 }
 
 module "redis_instance" {
@@ -132,6 +65,8 @@ module "auto_scaling_be" {
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
   ecs_instance_type           = "be"
+
+  depends_on = [module.ssm_iam_role]
 }
 
 module "auto_scaling_fe" {
@@ -150,6 +85,8 @@ module "auto_scaling_fe" {
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Frontend"
   ecs_instance_type           = "fe"
+
+  depends_on = [module.ssm_iam_role]
 }
 
 module "auto_scaling_ai" {
@@ -168,6 +105,8 @@ module "auto_scaling_ai" {
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
   ecs_instance_type           = "ai"
+
+  depends_on = [module.ssm_iam_role]
 }
 
 resource "aws_ecs_cluster" "this" {
@@ -252,7 +191,7 @@ module "ecs_ai" {
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   target_group_arn           = module.tg_ai1.target_group_arn
   service_name               = "my-ai-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.role_arn  # 수정된 부분
   part_capacity_provider     = aws_ecs_capacity_provider.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
 
   containers = [
@@ -350,6 +289,8 @@ module "ecs_ai" {
       container_port   = 5001
     }
   ]
+
+  depends_on = [module.ecs_execution_role]
 }
 
 
@@ -364,7 +305,7 @@ module "ecs_be" {
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   target_group_arn           = module.tg_be.target_group_arn
   service_name               = "my-be-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.role_arn  # 수정된 부분
   part_capacity_provider     = aws_ecs_capacity_provider.be_capacity_provider.name  # BE 서비스의 Capacity Provider
 
   containers = [
@@ -415,6 +356,7 @@ module "ecs_be" {
       container_port   = 8080
     }
   ]
+  depends_on = [module.ecs_execution_role]
 }
 # FE 파트
 module "ecs_fe" {
@@ -427,7 +369,7 @@ module "ecs_fe" {
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
   target_group_arn           = module.tg_fe.target_group_arn
   service_name               = "my-fe-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.role_arn  # 수정된 부분
   part_capacity_provider     = aws_ecs_capacity_provider.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
 
   containers = [
@@ -453,6 +395,7 @@ module "ecs_fe" {
       container_port   = 3000
     }
   ]
+  depends_on = [module.ecs_execution_role]
 }
 
 ########################################

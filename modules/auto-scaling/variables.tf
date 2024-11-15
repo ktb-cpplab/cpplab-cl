@@ -68,3 +68,15 @@ variable "ecs_instance_type" {
   description = "ECS 인스턴스 타입을 지정 (fe, be, ai 등)"
   type        = string
 }
+
+variable "health_check_grace_period" {
+  description = "The amount of time, in seconds, after an instance comes into service before checking its health."
+  type        = number
+  default     = 150  
+}
+
+variable "protect_from_scale_in" {
+  description = "Boolean to enable/disable instance protection from scale-in for the Auto Scaling group."
+  type        = bool
+  default     = false 
+}

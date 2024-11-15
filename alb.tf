@@ -29,7 +29,7 @@ module "tg_jenkins" {
   name             = "jenkins-target-group"
   port             = 8080
   vpc_id           = module.vpc.vpc_id
-  health_check_path = "/jenkins"
+  health_check_path = "/health"
 }
 
 module "tg_fe" {
@@ -58,7 +58,7 @@ module "tg_ai1" {
 
 module "tg_ai2" {
   source           = "./modules/target_group"
-  name             = "ai2-target-group"
+  name             = "progen-tg"
   port             = 5001
   vpc_id           = module.vpc.vpc_id
   health_check_path = "/ai/health"

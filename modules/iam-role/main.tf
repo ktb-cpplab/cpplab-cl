@@ -1,23 +1,29 @@
-# IAM 역할 생성
+# IAM Role 생성
 resource "aws_iam_role" "this" {
-  name = var.role_name
-
+  name               = var.role_name
   assume_role_policy = var.assume_role_policy
+  tags               = var.tags
+}
 
-  tags = merge(var.tags, {
-    Name = var.role_name
+# 인라인 정책 생성
+resource "aws_iam_policy" "inline_policy" {
+  count = length(var.policy_statements) > 0 ? 1 : 0
+  name  = "${var.role_name}-inline-policy"
+
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = var.policy_statements
   })
 }
 
-# IAM 역할에 정책을 연결
-resource "aws_iam_role_policy_attachment" "policy_attachment" {
-  for_each = toset(var.policy_arns)
-
+# IAM Role에 정책 연결
+resource "aws_iam_role_policy_attachment" "policy_attachments" {
+  for_each   = toset(var.policy_arns)
   role       = aws_iam_role.this.name
   policy_arn = each.value
 }
 
-# IAM 인스턴스 프로파일
+# 인스턴스 프로파일 생성
 resource "aws_iam_instance_profile" "this" {
   name = "${var.role_name}-instance-profile"
   role = aws_iam_role.this.name
