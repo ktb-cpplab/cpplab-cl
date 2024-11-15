@@ -42,5 +42,5 @@ variable "tags" {
 variable "root_volume_size" {
   description = "The size of the root EBS volume in GB"
   type        = number
-  default     = 20  # 기본값을 30GB로 설정
+  default     = 30  # 기본값을 30GB로 설정
 }

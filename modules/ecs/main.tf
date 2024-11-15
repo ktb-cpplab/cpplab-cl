@@ -22,25 +22,12 @@ resource "aws_ecs_service" "this" {
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
-  #launch_type     = "EC2"
-
   
   # 각 서비스에 지정된 Capacity Provider 사용 설정
   capacity_provider_strategy {
     capacity_provider = var.part_capacity_provider  # 각 서비스용 Capacity Provider
     weight            = 1  # 해당 Capacity Provider에 부여하는 가중치
   }
-  
-  # # Deployment configuration 추가
-  # deployment_controller {
-  #   type = "ECS"  // 이 부분이 다른 값일 경우, `deployment_configuration` 사용 불가
-  # }
-
-  # # deployment_configuration은 `ECS` 타입에서만 사용 가능
-  # deployment_configuration {
-  #   maximum_percent         = 200
-  #   minimum_healthy_percent = 50
-  # }
 
   dynamic "network_configuration" {
     for_each = var.network_mode == "awsvpc" ? [1] : []

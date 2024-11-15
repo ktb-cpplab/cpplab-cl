@@ -11,90 +11,6 @@ module "vpc" {
   nat_security_group_id = module.nat_security_group.security_group_id
 }
 
-
-module "ssm_iam_role" {
-  source            = "./modules/iam-role"
-  role_name         = "ssm-ec2-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-  })
-  policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
-    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
-    "arn:aws:iam::aws:policy/AutoScalingFullAccess",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  ]
-  
-  # inline_policies = {
-  #   ecs_deployment_policy = jsonencode({
-  #     Version = "2012-10-17",
-  #     Statement = [
-  #       {
-  #         Effect = "Allow",
-  #         Action = [
-  #           "ecs:RegisterTaskDefinition",
-  #           "ecs:UpdateService"
-  #         ],
-  #         Resource = "*"
-  #       }
-  #     ]
-  #   })
-  # }
-  
-  tags = {
-    Environment = "dev"
-  }
-}
-
-resource "aws_iam_role" "ecs_execution_role" {
-  name               = "ecs-execution-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-}
-
-resource "aws_iam_policy" "parameter_access_policy" {
-  name        = "ParameterAccessPolicy"
-  description = "Allows ECS tasks to access AWS parameter Manager"
-  
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage",
-        "ssm:GetParameter",
-        "ssm:GetParameters"
-      ],
-      Resource = "*"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_parameter_access_policy" {
-  policy_arn = aws_iam_policy.parameter_access_policy.arn
-  role       = aws_iam_role.ecs_execution_role.name
-}
-
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
@@ -106,12 +22,6 @@ module "jenkins_instance" {
   iam_instance_profile = module.ssm_iam_role.instance_profile_name
   root_volume_size     = 30
   tags                 = merge(var.tags, { Name = "Jenkins" })
-
-}
-
-resource "aws_lb_target_group_attachment" "example" {
-  target_group_arn = module.alb.jenkins-target-group-arn   # ALB 타겟 그룹의 ARN을 변수로 받음
-  target_id        = module.jenkins_instance.instance_id
 }
 
 module "redis_instance" {
@@ -138,15 +48,6 @@ module "Monitor_instance" {
   tags                 = merge(var.tags, { Name = "Monitor" })
 }
 
-module "alb" {
-  source            = "./modules/alb"
-  lb_name           = "alb"
-  internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
-  vpc_id            = module.vpc.vpc_id
-}
-
 module "auto_scaling_be" {
   source                     = "./modules/auto-scaling"
   name_prefix                = "launch-template-be"
@@ -159,11 +60,12 @@ module "auto_scaling_be" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.be_target_group_arn]
+  target_group_arns          = [module.tg_be.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Backend"
   ecs_instance_type           = "be"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
+
+  depends_on = [module.ssm_iam_role]
 }
 
 module "auto_scaling_fe" {
@@ -178,11 +80,12 @@ module "auto_scaling_fe" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.fe_target_group_arn]
+  target_group_arns          = [module.tg_fe.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "Frontend"
   ecs_instance_type           = "fe"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
+
+  depends_on = [module.ssm_iam_role]
 }
 
 module "auto_scaling_ai" {
@@ -197,301 +100,15 @@ module "auto_scaling_ai" {
   desired_capacity           = var.asg_desired_capacity
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
-  target_group_arns          = [module.alb.ai_target_group_arn]
+  target_group_arns          = [module.tg_ai1.target_group_arn, module.tg_ai2.target_group_arn]
   iam_instance_profile       = module.ssm_iam_role.instance_profile_name
   tag_name                   = "AI"
   ecs_instance_type           = "ai"
-  //ecs_cluster_name           = module.ecs.ecs_cluster_id  # ECS 클러스터 이름 전달
+
+  depends_on = [module.ssm_iam_role]
 }
 
-resource "aws_ecs_cluster" "this" {
-  name = "cpplab-ecs-cluster"  # 클러스터 이름
-}
-
-#########################
-# AI-1 서비스용 Capacity Provider 생성
-resource "aws_ecs_capacity_provider" "ai_capacity_provider" {
-  name = "ai-capacity-provider"  # Capacity Provider 이름
-
-  # Capacity Provider에 연계할 Auto Scaling Group 설정
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = module.auto_scaling_ai.asg_arn  # AI 서비스에 할당된 ASG의 ARN
-    managed_termination_protection = "ENABLED"  # ASG 인스턴스 보호 설정, 작업 중지 시 인스턴스 종료 방지
-
-    # Capacity Provider의 자동 스케일링 관리 설정
-    managed_scaling {
-      maximum_scaling_step_size = 1    # 스케일링 시 최대 EC2 인스턴스 수 증가 단위
-      minimum_scaling_step_size = 1    # 스케일링 시 최소 EC2 인스턴스 수 증가 단위
-      status                    = "ENABLED"  # 스케일링 활성화 상태
-      target_capacity           = 100        # 목표 사용률 (100%에 가까울수록 높은 사용률)
-    }
-  }
-}
-
-# BE 서비스용 Capacity Provider 생성
-resource "aws_ecs_capacity_provider" "be_capacity_provider" {
-  name = "be-capacity-provider"  # Capacity Provider 이름
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = module.auto_scaling_be.asg_arn  # BE 서비스에 할당된 ASG의 ARN
-    managed_termination_protection = "ENABLED"  # ASG 인스턴스 보호 설정
-
-    managed_scaling {
-      maximum_scaling_step_size = 1
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 100
-    }
-  }
-}
-
-# FE 서비스용 Capacity Provider 생성
-resource "aws_ecs_capacity_provider" "fe_capacity_provider" {
-  name = "fe-capacity-provider"  # Capacity Provider 이름
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = module.auto_scaling_fe.asg_arn  # FE 서비스에 할당된 ASG의 ARN
-    managed_termination_protection = "ENABLED"
-
-    managed_scaling {
-      maximum_scaling_step_size = 1
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 100
-    }
-  }
-}
-
-# 생성된 Capacity Provider들을 ECS 클러스터에 연결
-resource "aws_ecs_cluster_capacity_providers" "cluster_providers" {
-  cluster_name       = aws_ecs_cluster.this.name  # ECS 클러스터 이름
-  capacity_providers = [
-    aws_ecs_capacity_provider.ai_capacity_provider.name,
-    aws_ecs_capacity_provider.be_capacity_provider.name,
-    aws_ecs_capacity_provider.fe_capacity_provider.name
-  ]
-}
-#########################
-
-
-# ECS 모듈 호출
-# AI 파트
-module "ecs_ai" {
-  source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
-  task_family                = "ai-task-family"
-  desired_count              = 1
-  subnet_ids                 = module.vpc.private_subnet_ids
-  security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
-  target_group_arn           = module.alb.ai_target_group_arn
-  service_name               = "my-ai-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-  part_capacity_provider     = aws_ecs_capacity_provider.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
-
-  containers = [
-    {
-      name      = "ai-container-1"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
-      memory    = 1024
-      cpu       = 512
-      essential = true
-      portMappings = [{
-        containerPort = 5000
-        hostPort      = 5000
-        protocol      = "tcp"
-      }]
-      secrets = [
-        {
-          name      = "DB_URL"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_url"
-        },
-        {
-          name      = "MODEL_PATH"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/model/path"
-        },
-        {
-          name      = "DB_NAME"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/db/name"
-        },
-        {
-          name      = "DB_USER"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
-        },
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
-        },
-        {
-          name      = "DB_PORT"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_port"
-        }
-      ]
-    },
-    {
-      name      = "ai-container-2"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
-      memory    = 2096
-      cpu       = 512
-      essential = true
-      portMappings = [{
-        containerPort = 5001
-        hostPort      = 5001
-        protocol      = "tcp"
-      }]
-      secrets = [
-        {
-          name      = "HUGGINGFACEHUB_API_TOKEN"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/HUGGINGFACEHUB_API_TOKEN"
-        },
-        {
-          name      = "LANGCHAIN_API_KEY"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_API_KEY"
-        },
-        {
-          name      = "LANGCHAIN_ENDPOINT"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_ENDPOINT"
-        },
-        {
-          name      = "LANGCHAIN_PROJECT"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_PROJECT"
-        },
-        {
-          name      = "LANGCHAIN_TRACING_V2"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_TRACING_V2"
-        },
-        {
-          name      = "OPENAI_API_KEY"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/OPENAI_API_KEY"
-        },
-        {
-          name      = "UPSTAGE_API_KEY"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/UPSTAGE_API_KEY"
-        }
-      ]
-    }
-  ]
-
-  load_balancers = [
-    {
-      target_group_arn = module.alb.ai_target_group_arn
-      container_name   = "ai-container-1"
-      container_port   = 5000
-    },
-    {
-      target_group_arn = module.alb.ai2_target_group_arn
-      container_name   = "ai-container-2"
-      container_port   = 5001
-    }
-  ]
-}
-
-
-# BE 파트
-module "ecs_be" {
-  source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
-  task_family                = "be-task-family"
-  desired_count              = 1
-  subnet_ids                 = module.vpc.private_subnet_ids
-  security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
-  target_group_arn           = module.alb.be_target_group_arn
-  service_name               = "my-be-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-  part_capacity_provider     = aws_ecs_capacity_provider.be_capacity_provider.name  # BE 서비스의 Capacity Provider
-
-  containers = [
-    {
-      name      = "be-container"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
-      memory    = 512
-      cpu       = 256
-      essential = true
-      portMappings = [{
-        containerPort = 8080
-        hostPort      = 8080
-        protocol      = "tcp"
-      }]
-      secrets = [
-        {
-          name      = "DB_URL"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_URL"
-        },
-        {
-          name      = "DB_USERNAME"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
-        },
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
-        },
-        {
-          name      = "JWT_SECRET"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/JWT_SECRET"
-        },
-        {
-          name      = "KAKAO_CLIENT_SECRET"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/KAKAO_CLIENT_SECRET"
-        },
-        {
-          name      = "NAVER_CLIENT_SECRET"
-          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/NAVER_CLIENT_SECRET"
-        }
-      ]
-    }
-  ]
-
-  load_balancers = [
-    {
-      target_group_arn = module.alb.be_target_group_arn
-      container_name   = "be-container"
-      container_port   = 8080
-    }
-  ]
-}
-# FE 파트
-module "ecs_fe" {
-  source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
-  task_family                = "fe-task-family"
-  desired_count              = 1
-  subnet_ids                 = module.vpc.public_subnet_ids
-  security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
-  target_group_arn           = module.alb.fe_target_group_arn
-  service_name               = "my-fe-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
-  part_capacity_provider     = aws_ecs_capacity_provider.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
-
-  containers = [
-    {
-      name      = "fe-container"
-      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
-      memory    = 256
-      cpu       = 128
-      essential = true
-      portMappings = [{
-        containerPort = 3000
-        hostPort      = 3000
-        protocol      = "tcp"
-      }]
-      secrets = []
-    }
-  ]
-
-  load_balancers = [
-    {
-      target_group_arn = module.alb.fe_target_group_arn
-      container_name   = "fe-container"
-      container_port   = 3000
-    }
-  ]
-}
-
-########################################
 #RDS
-
 #postgres parameter db password
 module "db_password" {
   source          = "./modules/read-param"
