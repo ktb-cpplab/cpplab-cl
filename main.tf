@@ -11,7 +11,6 @@ module "vpc" {
   nat_security_group_id = module.nat_security_group.security_group_id
 }
 
-
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
@@ -109,9 +108,7 @@ module "auto_scaling_ai" {
   depends_on = [module.ssm_iam_role]
 }
 
-########################################
 #RDS
-
 #postgres parameter db password
 module "db_password" {
   source          = "./modules/read-param"

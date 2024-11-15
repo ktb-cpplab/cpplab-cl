@@ -4,10 +4,31 @@ variable "role_name" {
 }
 
 variable "assume_role_policy" {
-  description = "The assume role policy document JSON"
+  description = "The assume role policy document for the IAM role"
   type        = string
 }
 
+variable "policy_arns" {
+  description = "List of ARN for managed policies to attach to the IAM role"
+  type        = list(string)
+  default     = []
+}
+
+variable "inline_policies" {
+  type        = list(object({
+    Effect   = string
+    Action   = list(string)
+    Resource = string
+  }))
+  default     = []
+  description = "Inline policies for the IAM role"
+}
+
+variable "tags" {
+  description = "Tags to assign to the IAM role"
+  type        = map(string)
+  default     = {}
+}
 variable "policy_statements" {
   description = "List of inline policy statements for the role"
   type = list(object({
@@ -18,14 +39,8 @@ variable "policy_statements" {
   default = []
 }
 
-variable "policy_arns" {
-  description = "A list of IAM policy ARNs to attach to the role"
-  type        = list(string)
-  default     = []
-}
-
-variable "tags" {
-  description = "A map of tags to assign to the IAM role and instance profile"
-  type        = map(string)
-  default     = {}
+variable "create_instance_profile" {
+  description = "Whether to create an instance profile for the IAM role"
+  type        = bool
+  default     = false
 }

@@ -6,7 +6,7 @@ module "ai_capacity_provider" {
   source                        = "./modules/ecs/capacity_provider"
   name                          = "ai-capacity-provider"
   auto_scaling_group_arn        = module.auto_scaling_ai.asg_arn
-  managed_termination_protection = "ENABLED"
+  managed_termination_protection = "DISABLED"
   maximum_scaling_step_size     = 1
   minimum_scaling_step_size     = 1
   scaling_status                = "ENABLED"
@@ -17,7 +17,7 @@ module "be_capacity_provider" {
   source                        = "./modules/ecs/capacity_provider"
   name                          = "be-capacity-provider"
   auto_scaling_group_arn        = module.auto_scaling_be.asg_arn
-  managed_termination_protection = "ENABLED"
+  managed_termination_protection = "DISABLED"
   maximum_scaling_step_size     = 1
   minimum_scaling_step_size     = 1
   scaling_status                = "ENABLED"
@@ -28,7 +28,7 @@ module "fe_capacity_provider" {
   source                        = "./modules/ecs/capacity_provider"
   name                          = "fe-capacity-provider"
   auto_scaling_group_arn        = module.auto_scaling_fe.asg_arn
-  managed_termination_protection = "ENABLED"
+  managed_termination_protection = "DISABLED"
   maximum_scaling_step_size     = 1
   minimum_scaling_step_size     = 1
   scaling_status                = "ENABLED"
@@ -58,7 +58,7 @@ module "ecs_ai" {
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   target_group_arn           = module.tg_ai1.target_group_arn
   service_name               = "my-ai-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
 
   containers = [
@@ -156,8 +156,9 @@ module "ecs_ai" {
       container_port   = 5001
     }
   ]
-}
 
+  depends_on = [ module.ecs_execution_role ]
+}
 
 # BE 파트
 module "ecs_be" {
@@ -170,7 +171,7 @@ module "ecs_be" {
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   target_group_arn           = module.tg_be.target_group_arn
   service_name               = "my-be-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.be_capacity_provider.name  # BE 서비스의 Capacity Provider
 
   containers = [
@@ -221,6 +222,7 @@ module "ecs_be" {
       container_port   = 8080
     }
   ]
+  depends_on = [ module.ecs_execution_role ]
 }
 # FE 파트
 module "ecs_fe" {
@@ -233,7 +235,7 @@ module "ecs_fe" {
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
   target_group_arn           = module.tg_fe.target_group_arn
   service_name               = "my-fe-service"
-  execution_role_arn         = aws_iam_role.ecs_execution_role.arn
+  execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
 
   containers = [
@@ -259,4 +261,5 @@ module "ecs_fe" {
       container_port   = 3000
     }
   ]
+  depends_on = [ module.ecs_execution_role ]
 }

@@ -14,22 +14,20 @@ module "ssm_iam_role" {
   policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
     "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
-  ]
-  policy_statements = [
-    {
-      Effect   = "Allow",
-      Action   = ["autoscaling:DescribeAutoScalingGroups", "autoscaling:UpdateAutoScalingGroup"],
-      Resource = "*"
-    }
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+    "arn:aws:iam::aws:policy/AutoScalingFullAccess",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
   tags = {
     Environment = "dev"
   }
+  create_instance_profile = true
 }
 
 module "ecs_execution_role" {
   source             = "./modules/iam-role"
-  role_name          = "ecs-execution-role"
+  role_name          = "ecs_execution_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -40,11 +38,19 @@ module "ecs_execution_role" {
       }
     }]
   })
-  policy_statements = [
+  policy_arns = []
+  inline_policies = [
     {
       Effect   = "Allow",
-      Action   = ["ecr:GetAuthorizationToken", "ecr:BatchCheckLayerAvailability"],
-      Resource = "arn:aws:ecr:ap-northeast-2:account-id:repository/repository-name"
+      Action   = [
+        "ecr:GetAuthorizationToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ],
+      Resource = "*"
     }
   ]
   tags = {
@@ -52,6 +58,3 @@ module "ecs_execution_role" {
   }
 }
 
-output "ecs_execution_role_arn" {
-  value = module.ecs_execution_role.role_arn
-}
