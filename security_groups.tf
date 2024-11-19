@@ -18,6 +18,18 @@ module "mt_security_group" {
       to_port     = 3000
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      from_port   = 9090  #node exporter
+      to_port     = 9090
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      from_port   = 22  # ssh
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
     }
   ]
   egress_rules = [
@@ -177,6 +189,19 @@ module "auto_scaling_fe_security_group" {
       to_port         = 3000
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 19100
+      to_port         = 19100
+      protocol        = "tcp"
+      security_groups = [module.mt_security_group.security_group_id]
+    }
+    ,
+    {
+      from_port       = 18080
+      to_port         = 18080
+      protocol        = "tcp"
+      security_groups = [module.mt_security_group.security_group_id]
     }
   ]
 
@@ -214,6 +239,19 @@ module "auto_scaling_ai_security_group" {
       to_port         = 5001
       protocol        = "tcp"
       security_groups = [module.alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 19100
+      to_port         = 19100
+      protocol        = "tcp"
+      security_groups = [module.mt_security_group.security_group_id]
+    }
+    ,
+    {
+      from_port       = 18080
+      to_port         = 18080
+      protocol        = "tcp"
+      security_groups = [module.mt_security_group.security_group_id]
     }
   ]
 

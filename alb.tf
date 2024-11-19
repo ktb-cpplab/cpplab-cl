@@ -132,6 +132,6 @@ module "listener_rule_ai2" {
   source           = "./modules/listener_rule"
   listener_arn     = module.listener_be_https.listener_arn
   priority         = 300
-  path_patterns    = ["/ai/genproject"]
+  path_patterns    = ["/ai/genproject", "/ai/regenproject"]
   target_group_arn = module.tg_ai2.target_group_arn
 }

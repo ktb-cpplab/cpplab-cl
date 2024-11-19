@@ -34,6 +34,11 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
+variable "mt_instance_type" {
+  description = "Default instance type"
+  default     = "t3a.micro"
+}
+
 variable "ai_instance_type" {
   description = "Default instance type"
   default     = "t3a.large"

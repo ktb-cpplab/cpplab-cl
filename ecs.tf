@@ -65,8 +65,8 @@ module "ecs_ai" {
     {
       name      = "ai-container-1"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
-      memory    = 1024
-      cpu       = 512
+      memory    = 512
+      cpu       = 256
       essential = true
       portMappings = [{
         containerPort = 5000
@@ -103,8 +103,8 @@ module "ecs_ai" {
     {
       name      = "ai-container-2"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
-      memory    = 2096
-      cpu       = 512
+      memory    = 256
+      cpu       = 256
       essential = true
       portMappings = [{
         containerPort = 5001

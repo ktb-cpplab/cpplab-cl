@@ -39,7 +39,7 @@ module "redis_instance" {
 module "Monitor_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.mt_ami
-  instance_type        = var.instance_type
+  instance_type        = var.mt_instance_type
   key_name             = var.key_name
   security_group_id    = module.mt_security_group.security_group_id
   subnet_id            = module.vpc.public_subnet_ids[0]
