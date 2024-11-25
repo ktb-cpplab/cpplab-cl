@@ -139,6 +139,10 @@ module "ecs_ai" {
         {
           name      = "UPSTAGE_API_KEY"
           valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/UPSTAGE_API_KEY"
+        },
+        {
+          name      = "CLOUD_DB"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/CLOUD_DB"
         }
       ]
     }
