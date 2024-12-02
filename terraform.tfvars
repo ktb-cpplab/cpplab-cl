@@ -13,6 +13,7 @@ be_instance_type = "t3a.medium"
 ai_instance_type = "t3a.large"
 fe_instance_type = "t3a.small"
 nat_instance_type = "t2.micro"
+jenkins_instance_type = "t3a.medium"
 
 nat_ami = "ami-0e0ce674db551c1a5"
 instance_ami = "ami-012880a6f6805d019"  # docker, node exporter, cAdvisor (수정완료 11.15)

@@ -97,6 +97,10 @@ module "ecs_ai" {
         {
           name      = "DB_PORT"
           valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_port"
+        },
+        {
+          name      = "MECAB_PATH"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/mecab/path"
         }
       ]
     },
@@ -183,7 +187,7 @@ module "ecs_be" {
       name      = "be-container"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
       memory    = 512
-      cpu       = 256
+      cpu       = 512
       essential = true
       portMappings = [{
         containerPort = 8080

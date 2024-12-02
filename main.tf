@@ -14,7 +14,7 @@ module "vpc" {
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
-  instance_type        = "t3a.large"
+  instance_type        = var.jenkins_instance_type
   key_name             = var.key_name
   security_group_id    = module.jenkins_security_group.security_group_id
   subnet_id            = module.vpc.private_subnet_ids[0]

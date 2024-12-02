@@ -60,3 +60,9 @@ module "update_rds_endpoint" {
   parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
   new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"  # RDS 엔드포인트 값을 문자열로 연결
 }
+
+module "update_ai_db_url" {
+  source          = "./modules/write-param"           # 모듈 경로
+  parameter_name  = "/ecs/ai/db_url"                  # Parameter Store의 경로
+  new_value       = replace(module.rds_postgres.rds_endpoint, ":5432", "")
+}
