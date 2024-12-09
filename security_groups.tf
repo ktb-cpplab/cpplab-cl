@@ -24,12 +24,6 @@ module "mt_security_group" {
       to_port     = 9090
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      from_port   = 22  # ssh
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
     }
   ]
   egress_rules = [
@@ -86,12 +80,6 @@ module "jenkins_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     },
     {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
       from_port   = 80
       to_port     = 80
       protocol    = "tcp"
@@ -110,9 +98,9 @@ module "jenkins_security_group" {
 }
 
 # ALB 보안 그룹 모듈
-module "alb_security_group" {
+module "fe_alb_security_group" {
   source        = "./modules/security-group"
-  name          = "alb-security-group"
+  name          = "fe-alb-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -140,6 +128,36 @@ module "alb_security_group" {
   ]
 }
 
+module "be_alb_security_group" {
+  source        = "./modules/security-group"
+  name          = "be-alb-security-group"
+  vpc_id        = module.vpc.vpc_id
+
+  ingress_rules = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      security_groups = [module.fe_alb_security_group.security_group_id]
+    },
+    {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      security_groups = [module.fe_alb_security_group.security_group_id]
+    }
+  ]
+
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
+
 # Auto Scaling BE 보안 그룹 모듈
 module "auto_scaling_be_security_group" {
   source        = "./modules/security-group"
@@ -151,13 +169,19 @@ module "auto_scaling_be_security_group" {
       from_port       = 80
       to_port         = 80
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.be_alb_security_group.security_group_id]
     },
     {
       from_port       = 8080
       to_port         = 8080
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.be_alb_security_group.security_group_id]
+    },
+    {
+      from_port       = 8080
+      to_port         = 8080
+      protocol        = "tcp"
+      security_groups = [module.mt_security_group.security_group_id]
     }
   ]
 
@@ -182,13 +206,13 @@ module "auto_scaling_fe_security_group" {
       from_port       = 80
       to_port         = 80
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.fe_alb_security_group.security_group_id]
     },
     {
       from_port       = 3000
       to_port         = 3000
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.fe_alb_security_group.security_group_id]
     },
     {
       from_port       = 19100
@@ -226,19 +250,19 @@ module "auto_scaling_ai_security_group" {
       from_port       = 80
       to_port         = 80
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.be_alb_security_group.security_group_id]
     },
     {
       from_port       = 5000
       to_port         = 5000
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.be_alb_security_group.security_group_id]
     },
     {
       from_port       = 5001
       to_port         = 5001
       protocol        = "tcp"
-      security_groups = [module.alb_security_group.security_group_id]
+      security_groups = [module.be_alb_security_group.security_group_id]
     },
     {
       from_port       = 19100

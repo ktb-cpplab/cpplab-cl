@@ -3,7 +3,7 @@ module "alb_jenkins" {
   source            = "./modules/alb"
   name              = "jenkins-alb"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.fe_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 
@@ -11,7 +11,7 @@ module "alb_fe" {
   source            = "./modules/alb"
   name              = "alb-fe"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.fe_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 
@@ -19,7 +19,7 @@ module "alb_main" {
   source            = "./modules/alb"
   name              = "alb-main"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.be_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 

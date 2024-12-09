@@ -94,7 +94,7 @@ resource "aws_appautoscaling_policy" "scale_in_policy" {
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    target_value       = 30  // CPU 사용률이 30% 이하로 떨어지면 축소
+    target_value       = 70  // CPU 사용률이 30% 이하로 떨어지면 축소
     scale_in_cooldown  = 300 // 축소 후 대기 시간 (초)
     scale_out_cooldown = 300 // 확장 후 대기 시간 (초)
   }
