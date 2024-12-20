@@ -8,8 +8,8 @@ availability_zones = ["ap-northeast-2a", "ap-northeast-2c"]
 key_name = "cpplab-keypair"
 
 instance_type = "t2.micro"
-mt_instance_type = "t3a.micro"
-be_instance_type = "t3a.medium"
+mt_instance_type = "t3a.medium"
+be_instance_type = "t3a.small"
 ai_instance_type = "t3a.small"
 fe_instance_type = "t3a.small"
 nat_instance_type = "t2.micro"

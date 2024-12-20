@@ -124,7 +124,7 @@ module "listener_rule_ai" {
   source           = "./modules/listener_rule"
   listener_arn     = module.listener_be_https.listener_arn
   priority         = 200
-  path_patterns    = ["/ai/recommend"]
+  path_patterns    = ["/ai/recommend","/ai/updatechain","/ai/delsession","/ai/test/asyncgenproject","/ai/test/syncgenproject"]
   target_group_arn = module.tg_ai1.target_group_arn
 }
 
