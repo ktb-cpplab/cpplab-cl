@@ -66,7 +66,7 @@ module "ecs_ai" {
       name      = "ai-container-1"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
       memory    = 1024
-      cpu       = 512
+      cpu       = 1024
       essential = true
       portMappings = [{
         containerPort = 5000
@@ -97,13 +97,17 @@ module "ecs_ai" {
         {
           name      = "DB_PORT"
           valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_port"
+        },
+        {
+          name      = "MECAB_PATH"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/mecab/path"
         }
       ]
     },
     {
       name      = "ai-container-2"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
-      memory    = 2096
+      memory    = 512
       cpu       = 512
       essential = true
       portMappings = [{
@@ -139,6 +143,14 @@ module "ecs_ai" {
         {
           name      = "UPSTAGE_API_KEY"
           valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/UPSTAGE_API_KEY"
+        },
+        {
+          name      = "CLOUD_DB"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/CLOUD_DB"
+        },
+        {
+          name      = "CLOUD_REDIS"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/CLOUD_REDIS"
         }
       ]
     }
@@ -178,8 +190,8 @@ module "ecs_be" {
     {
       name      = "be-container"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be"
-      memory    = 512
-      cpu       = 256
+      memory    = 1536
+      cpu       = 1536
       essential = true
       portMappings = [{
         containerPort = 8080
@@ -242,8 +254,8 @@ module "ecs_fe" {
     {
       name      = "fe-container"
       image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
-      memory    = 256
-      cpu       = 128
+      memory    = 1024
+      cpu       = 1024
       essential = true
       portMappings = [{
         containerPort = 3000

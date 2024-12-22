@@ -3,7 +3,7 @@ module "alb_jenkins" {
   source            = "./modules/alb"
   name              = "jenkins-alb"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.fe_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 
@@ -11,7 +11,7 @@ module "alb_fe" {
   source            = "./modules/alb"
   name              = "alb-fe"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.fe_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 
@@ -19,7 +19,7 @@ module "alb_main" {
   source            = "./modules/alb"
   name              = "alb-main"
   internal          = false
-  security_group_ids = [module.alb_security_group.security_group_id]
+  security_group_ids = [module.be_alb_security_group.security_group_id]
   subnet_ids        = module.vpc.public_subnet_ids
 }
 
@@ -124,7 +124,7 @@ module "listener_rule_ai" {
   source           = "./modules/listener_rule"
   listener_arn     = module.listener_be_https.listener_arn
   priority         = 200
-  path_patterns    = ["/ai/recommend"]
+  path_patterns    = ["/ai/recommend","/ai/updatechain","/ai/delsession","/ai/test/asyncgenproject","/ai/test/syncgenproject"]
   target_group_arn = module.tg_ai1.target_group_arn
 }
 
@@ -132,6 +132,6 @@ module "listener_rule_ai2" {
   source           = "./modules/listener_rule"
   listener_arn     = module.listener_be_https.listener_arn
   priority         = 300
-  path_patterns    = ["/ai/genproject"]
+  path_patterns    = ["/ai/genproject", "/ai/regenproject"]
   target_group_arn = module.tg_ai2.target_group_arn
 }

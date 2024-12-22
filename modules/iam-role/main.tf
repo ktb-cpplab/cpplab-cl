@@ -36,9 +36,11 @@ resource "aws_iam_role_policy" "inline_policy_attachment" {
 } 
 
 
-# 인스턴스 프로파일 생성 (필요시 적용)
 resource "aws_iam_instance_profile" "this" {
-  //count = var.create_instance_profile ? 1 : 0
-  name  = "${var.role_name}-instance-profile"
-  role  = aws_iam_role.this.name
+  name = "${var.role_name}-instance-profile"
+  role = aws_iam_role.this.name
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }
