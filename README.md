@@ -75,11 +75,11 @@ ECS와 ASG로 컨테이너를 배포 및 확장하며, ALB와 Route 53으로 도
 
 ### **4. Auto Scaling 및 태스크 확장 로직**
 
-[링크](https://www.notion.so/read-me-161e56f62c3e8009b05eeb747c512e43?pvs=21)
+[링크](#ansible-대신-ecs-사용-이유)
 
 ### **5. 모니터링 및 로그 관리**
 
-[링크](https://www.notion.so/read-me-161e56f62c3e8009b05eeb747c512e43?pvs=21)
+[링크](#prometheus--grafana)
 
 ### **6. 보안 강화**
 
@@ -93,7 +93,7 @@ ECS와 ASG로 컨테이너를 배포 및 확장하며, ALB와 Route 53으로 도
 
 ### **7. Jenkins를 활용한 CI/CD**
 
-[링크](https://www.notion.so/read-me-161e56f62c3e8009b05eeb747c512e43?pvs=21)
+[링크](#jenkins-사용-이유)
 
 ---
 
