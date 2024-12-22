@@ -22,7 +22,7 @@
 
 # **📈 아키텍처**
 <details>
-  <summary>본문 확인</summary>
+  <summary>📘본문 확인</summary>
   <div markdown="1">
     
 <img src="./images/Architecture.png">
@@ -112,7 +112,7 @@ ECS와 ASG로 컨테이너를 배포 및 확장하며, ALB와 Route 53으로 도
 # **🔨 모니터링 및 유지보수**
 
 <details>
-  <summary>본문 확인</summary>
+  <summary>📘본문 확인</summary>
   <div markdown="1">
     
 ## Log Monitor
@@ -158,7 +158,7 @@ ECS와 ASG로 컨테이너를 배포 및 확장하며, ALB와 Route 53으로 도
 # **💎 왜 이 기술을 사용했는가?**
 
 <details>
-  <summary>본문 확인</summary>
+  <summary>📘본문 확인</summary>
   <div markdown="1">
 
     
