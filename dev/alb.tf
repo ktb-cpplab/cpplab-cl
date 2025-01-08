@@ -1,137 +1,139 @@
-# ALB 모듈 호출 (Jenkins, FE, BE)
-module "alb_jenkins" {
-  source            = "./modules/alb"
-  name              = "jenkins-alb"
-  internal          = false
-  security_group_ids = [module.fe_alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
+################################################################################
+# alb frontend
+################################################################################
+
+module "alb_frontend" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 9.0"
+
+  name = var.frontend_alb_name
+
+  load_balancer_type = "application"
+
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.public_subnets
+
+  enable_deletion_protection = false
+
+  security_group_ingress_rules = {
+    all_http = {
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4   = module.vpc.vpc_cidr_block
+    }
+  }
+
+  listeners = {
+    ex_http = {
+      port     = 80
+      protocol = "HTTP"
+
+      forward = {
+        target_group_key = var.frontend_target_group
+      }
+    }
+  }
+
+  target_groups = {
+    (var.frontend_target_group) = {
+      protocol                          = "HTTP"
+      port                              = 3000
+      target_type                       = "instance"
+      deregistration_delay              = 5
+      load_balancing_cross_zone_enabled = true
+
+      health_check = {
+        enabled             = true
+        healthy_threshold   = 5
+        interval            = 30
+        matcher             = "200"
+        path                = "/"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 5
+        unhealthy_threshold = 2
+      }
+
+      create_attachment = false
+    }
+  }
+
+  tags = var.frontend_tags
 }
 
-module "alb_fe" {
-  source            = "./modules/alb"
-  name              = "alb-fe"
-  internal          = false
-  security_group_ids = [module.fe_alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
-}
+################################################################################
+# alb backend
+################################################################################
 
-module "alb_main" {
-  source            = "./modules/alb"
-  name              = "alb-main"
-  internal          = false
-  security_group_ids = [module.be_alb_security_group.security_group_id]
-  subnet_ids        = module.vpc.public_subnet_ids
-}
+module "alb_backend" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 9.0"
 
-# 타겟 그룹 모듈 호출
-module "tg_jenkins" {
-  source           = "./modules/target_group"
-  name             = "jenkins-target-group"
-  port             = 8080
-  vpc_id           = module.vpc.vpc_id
-  health_check_path = "/health"
-}
+  name = var.backend_alb_name
 
-module "tg_fe" {
-  source           = "./modules/target_group"
-  name             = "frontend-target-group"
-  port             = 3000
-  vpc_id           = module.vpc.vpc_id
-  health_check_path = "/"
-}
+  load_balancer_type = "application"
 
-module "tg_be" {
-  source           = "./modules/target_group"
-  name             = "backend-target-group"
-  port             = 8080
-  vpc_id           = module.vpc.vpc_id
-  health_check_path = "/api/v1/health"
-}
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.public_subnets
 
-module "tg_ai1" {
-  source           = "./modules/target_group"
-  name             = "pickle-tg"
-  port             = 5000
-  vpc_id           = module.vpc.vpc_id
-  health_check_path = "/ai/health"
-}
+  enable_deletion_protection = false
 
-module "tg_ai2" {
-  source           = "./modules/target_group"
-  name             = "progen-tg"
-  port             = 5001
-  vpc_id           = module.vpc.vpc_id
-  health_check_path = "/ai/health"
-}
+  security_group_ingress_rules = {
+    all_http = {
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4   = module.vpc.vpc_cidr_block
+    }
+  }
 
-# 리스너 모듈 호출
-module "listener_jenkins" {
-  source            = "./modules/listener"
-  load_balancer_arn = module.alb_jenkins.alb_arn
-  port              = 80
-  protocol          = "HTTP"
-  target_group_arn  = module.tg_jenkins.target_group_arn
-}
+  listeners = {
+    ex_http = {
+      port     = 80
+      protocol = "HTTP"
 
-# HTTP 리스너 설정 (80에서 443으로 리디렉션)
-module "listener_fe_http_redirect" {
-  source            = "./modules/listener"
-  load_balancer_arn = module.alb_fe.alb_arn
-  port              = 80
-  protocol          = "HTTP"
-  redirect          = true
-}
+      forward = {
+        target_group_key = var.backend_target_group
+      }
+    }
+  }
 
-# HTTPS 리스너 설정 (443에서 실제 트래픽 포워딩)
-module "listener_fe_https" {
-  source            = "./modules/listener"
-  load_balancer_arn = module.alb_fe.alb_arn
-  port              = 443
-  protocol          = "HTTPS"
-  target_group_arn  = module.tg_fe.target_group_arn
-  certificate_arn   = var.certificate_arn
-  redirect          = false
-}
+  target_groups = {
+    (var.backend_target_group) = {
+      protocol                          = "HTTP"
+      port                              = 8080
+      target_type                       = "instance"
+      deregistration_delay              = 5
+      load_balancing_cross_zone_enabled = true
 
-module "listener_be_http_redirect" {
-  source            = "./modules/listener"
-  load_balancer_arn = module.alb_main.alb_arn
-  port              = 80
-  protocol          = "HTTP"
-  redirect          = true
-}
+      health_check = {
+        enabled             = true
+        healthy_threshold   = 5
+        interval            = 30
+        matcher             = "200"
+        path                = "/"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 5
+        unhealthy_threshold = 2
+      }
 
-module "listener_be_https" {
-  source            = "./modules/listener"
-  load_balancer_arn = module.alb_main.alb_arn
-  port              = 443
-  protocol          = "HTTPS"
-  target_group_arn  = module.tg_be.target_group_arn
-  certificate_arn   = var.certificate_arn
-  redirect          = false
-}
+      create_attachment = false
+    }
+  }
 
-# 리스너 규칙 모듈 호출
-module "listener_rule_be" {
-  source           = "./modules/listener_rule"
-  listener_arn     = module.listener_be_https.listener_arn
-  priority         = 100
-  path_patterns    = ["/api/*", "/oauth2/*", "/login/*"]
-  target_group_arn = module.tg_be.target_group_arn
-}
-
-module "listener_rule_ai" {
-  source           = "./modules/listener_rule"
-  listener_arn     = module.listener_be_https.listener_arn
-  priority         = 200
-  path_patterns    = ["/ai/recommend","/ai/updatechain","/ai/delsession","/ai/test/asyncgenproject","/ai/test/syncgenproject"]
-  target_group_arn = module.tg_ai1.target_group_arn
-}
-
-module "listener_rule_ai2" {
-  source           = "./modules/listener_rule"
-  listener_arn     = module.listener_be_https.listener_arn
-  priority         = 300
-  path_patterns    = ["/ai/genproject", "/ai/regenproject"]
-  target_group_arn = module.tg_ai2.target_group_arn
+  tags = var.backend_tags
 }

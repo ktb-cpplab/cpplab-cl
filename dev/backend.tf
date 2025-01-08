@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = var.tfbackend_bucket
-    key            = var.tfbackend_key
-    region         = var.tfbackend_region
-    dynamodb_table = var.tfbackend_dynamodb_table
+    bucket         = "cpplab-terraform-state-dev"
+    key            = "terraform.tfstate"
+    region         = "ap-northeast-2"
+    dynamodb_table = "cpplab-terraform-lock-dev"
     encrypt        = true
   }
 }
