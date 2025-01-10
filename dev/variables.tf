@@ -45,6 +45,11 @@ variable "public_subnets" {
   type        = list(string)
 }
 
+variable "database_subnets" {
+  description = "A list of database subnet CIDR blocks"
+  type        = list(string)
+}
+
 variable "enable_nat_gateway" {
   description = "Whether to enable NAT gateway"
   type        = bool
@@ -200,9 +205,25 @@ variable "action_type" {
   default     = "expire"
 }
 
+# RDS settings
+variable "db_password_parameter_name" {
+  description = "The name of the Parameter Store key for the RDS password"
+  type        = string
+}
+
 # Parameter Store settings
 variable "parameter_store_keys" {
   description = "List of Parameter Store keys to fetch"
   type        = list(string)
   default     = []
+}
+
+variable "db_url_parameter_name" {
+  description = "The name of the Parameter Store key for the RDS URL"
+  type        = string
+}
+
+variable "ai_db_url_parameter_name" {
+  description = "The name of the Parameter Store key for the AI RDS URL"
+  type        = string
 }

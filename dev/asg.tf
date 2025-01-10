@@ -23,6 +23,7 @@ module "autoscaling" {
         ECS_ENABLE_TASK_IAM_ROLE=true
         EOF
       EOT
+      tags = var.frontend_tags
     }
     backend = {
       network_interfaces = [
@@ -44,6 +45,7 @@ module "autoscaling" {
         ECS_ENABLE_TASK_IAM_ROLE=true
         EOF
       EOT
+      tags = var.backend_tags
     }
   }
 
@@ -75,7 +77,7 @@ module "autoscaling" {
     AmazonECSManaged = true
   }
 
-  protect_from_scale_in = true
+  protect_from_scale_in = false
 
   tags = each.value.tags
 }

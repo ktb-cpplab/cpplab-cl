@@ -124,7 +124,7 @@ module "alb_backend" {
         healthy_threshold   = 5
         interval            = 30
         matcher             = "200"
-        path                = "/"
+        path                = "/api/v1/health"
         port                = "traffic-port"
         protocol            = "HTTP"
         timeout             = 5

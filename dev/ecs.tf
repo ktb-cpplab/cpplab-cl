@@ -13,7 +13,7 @@ module "ecs_cluster" {
     # On-demand instances
     frontend = {
       auto_scaling_group_arn         = module.autoscaling["frontend"].autoscaling_group_arn
-      managed_termination_protection = "ENABLED"
+      managed_termination_protection = "DISABLED"
 
       managed_scaling = {
         maximum_scaling_step_size = 2
@@ -29,7 +29,7 @@ module "ecs_cluster" {
     }
     backend = {
       auto_scaling_group_arn         = module.autoscaling["backend"].autoscaling_group_arn
-      managed_termination_protection = "ENABLED"
+      managed_termination_protection = "DISABLED"
 
       managed_scaling = {
         maximum_scaling_step_size = 2
@@ -40,7 +40,6 @@ module "ecs_cluster" {
 
       default_capacity_provider_strategy = {
         weight = 1
-        base   = 1
       }
     }
   }
