@@ -1,7 +1,3 @@
-resource "aws_ecs_cluster" "this" {
-  name = "cpplab-ecs-cluster"  # 클러스터 이름
-}
-
 module "ai_capacity_provider" {
   source                        = "./modules/ecs/capacity_provider"
   name                          = "ai-capacity-provider"
@@ -38,7 +34,7 @@ module "fe_capacity_provider" {
 
 # 생성된 Capacity Provider들을 ECS 클러스터에 연결
 resource "aws_ecs_cluster_capacity_providers" "cluster_providers" {
-  cluster_name       = aws_ecs_cluster.this.name  # ECS 클러스터 이름
+  cluster_name       = module.ecs_cluster.cluster_name  # ECS 클러스터 이름
   capacity_providers = [
     module.ai_capacity_provider.name,
     module.be_capacity_provider.name,
@@ -50,13 +46,13 @@ resource "aws_ecs_cluster_capacity_providers" "cluster_providers" {
 # AI 파트
 module "ecs_ai" {
   source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
+  cluster_id                 = module.ecs_cluster.cluster_id
+  cluster_name               = module.ecs_cluster.cluster_name
   task_family                = "ai-task-family"
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
-  target_group_arn           = module.tg_ai1.target_group_arn
+  target_group_arn           = module.target_group["ai1"].target_group_arn
   service_name               = "my-ai-service"
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.ai_capacity_provider.name  # AI 서비스의 Capacity Provider
@@ -158,12 +154,12 @@ module "ecs_ai" {
 
   load_balancers = [
     {
-      target_group_arn = module.tg_ai1.target_group_arn
+      target_group_arn = module.target_group["ai2"].target_group_arn
       container_name   = "ai-container-1"
       container_port   = 5000
     },
     {
-      target_group_arn = module.tg_ai2.target_group_arn
+      target_group_arn = module.target_group["ai2"].target_group_arn
       container_name   = "ai-container-2"
       container_port   = 5001
     }
@@ -176,12 +172,12 @@ module "ecs_ai" {
 module "ecs_be" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
+  cluster_name               = module.ecs_cluster.cluster_name
   task_family                = "be-task-family"
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
-  target_group_arn           = module.tg_be.target_group_arn
+  target_group_arn           = module.target_group["Backend"].target_group_arn
   service_name               = "my-be-service"
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.be_capacity_provider.name  # BE 서비스의 Capacity Provider
@@ -229,7 +225,7 @@ module "ecs_be" {
 
   load_balancers = [
     {
-      target_group_arn = module.tg_be.target_group_arn
+      target_group_arn = module.target_group["Backend"].target_group_arn
       container_name   = "be-container"
       container_port   = 8080
     }
@@ -240,12 +236,12 @@ module "ecs_be" {
 module "ecs_fe" {
   source                     = "./modules/ecs"
   cluster_id                 = aws_ecs_cluster.this.id
-  cluster_name               = aws_ecs_cluster.this.name
+  cluster_name               = module.ecs_cluster.cluster_name
   task_family                = "fe-task-family"
   desired_count              = 1
   subnet_ids                 = module.vpc.public_subnet_ids
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
-  target_group_arn           = module.tg_fe.target_group_arn
+  target_group_arn           = module.target_group["Frontend"].target_group_arn
   service_name               = "my-fe-service"
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.fe_capacity_provider.name  # FE 서비스의 Capacity Provider
@@ -268,7 +264,7 @@ module "ecs_fe" {
 
   load_balancers = [
     {
-      target_group_arn = module.tg_fe.target_group_arn
+      target_group_arn = module.target_group["Frontend"].target_group_arn
       container_name   = "fe-container"
       container_port   = 3000
     }

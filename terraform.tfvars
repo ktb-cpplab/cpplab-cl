@@ -36,3 +36,27 @@ tags = {
 }
 
 certificate_arn = "arn:aws:acm:ap-northeast-2:891612581533:certificate/a36ed071-ed0f-428c-b18f-0fa42f5f0dd4"
+
+################################################################################
+# ALB 설정
+################################################################################
+
+alb_tags = {
+  Environment = "dev"
+  ManagedBy   = "terraform"
+}
+target_group_tags = {
+  Environment = "dev"
+  ManagedBy   = "terraform"
+}
+alb_jenkins_name = "jenkins-alb"
+alb_fe_name = "alb-fe"
+alb_main_name = "alb-main"
+tg_jenkins_name = "jenkins-target-group"
+tg_fe_name = "frontend-target-group"
+tg_be_name = "backend-target-group"
+tg_ai1_name = "pickle-tg"
+tg_ai2_name = "progen-tg"
+be_path_patterns = ["/api/*", "/oauth2/*", "/login/*"]
+ai1_path_patterns = ["/ai/recommend","/ai/updatechain","/ai/delsession","/ai/test/asyncgenproject","/ai/test/syncgenproject"]
+ai2_path_patterns = ["/ai/genproject", "/ai/regenproject"]

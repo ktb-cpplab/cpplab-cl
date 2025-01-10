@@ -14,3 +14,8 @@ variable "security_group_ids" {
 variable "subnet_ids" {
   type = list(string)
 }
+
+variable "tags" {
+  description = "Tags to be applied to all resources"
+  type        = map(string)
+}

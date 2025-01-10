@@ -13,7 +13,7 @@ resource "aws_launch_template" "this" {
   # User Data를 추가하여 인스턴스를 ECS 클러스터에 연결
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    echo "ECS_CLUSTER=cpplab-ecs-cluster" >> /etc/ecs/ecs.config
+    echo "ECS_CLUSTER=${var.ecs_cluster_name}" >> /etc/ecs/ecs.config
   EOF
   )
   

@@ -7,7 +7,7 @@ variable "port" {
 }
 
 variable "protocol" {
-  type = string
+  type    = string
   default = "HTTP"
 }
 
@@ -16,11 +16,41 @@ variable "vpc_id" {
 }
 
 variable "target_type" {
-  type = string
+  type    = string
   default = "instance"
 }
 
 variable "health_check_path" {
-  type = string
+  type    = string
   default = "/"
+}
+
+variable "interval" {
+  type    = number
+  default = 30
+}
+
+variable "timeout" {
+  type    = number
+  default = 5
+}
+
+variable "healthy_threshold" {
+  type    = number
+  default = 3
+}
+
+variable "unhealthy_threshold" {
+  type    = number
+  default = 3
+}
+
+variable "matcher" {
+  type    = string
+  default = "200"
+}
+
+variable "tags" {
+  description = "Tags to be applied to all resources"
+  type        = map(string)
 }

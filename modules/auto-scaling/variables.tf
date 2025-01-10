@@ -80,3 +80,9 @@ variable "protect_from_scale_in" {
   type        = bool
   default     = false 
 }
+
+variable "ecs_cluster_name" {
+  description = "ECS 클러스터 이름"
+  type        = string
+  default = ""
+}

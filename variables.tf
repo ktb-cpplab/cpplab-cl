@@ -134,3 +134,89 @@ variable "certificate_arn" {
   type = string
   default = null
 }
+
+
+################################################################################
+# alb.tf
+################################################################################
+
+variable "alb_tags" {
+  description = "Tags for Application Load Balancer"
+  type        = map(string)
+  default     = {
+    Environment = "dev"
+    ManagedBy   = "terraform"
+  }
+}
+
+variable "alb_jenkins_name" {
+  description = "Application Load Balancer name for Jenkins"
+  default     = "alb-jenkins"
+}
+
+variable "alb_fe_name" {
+  description = "Application Load Balancer name for Frontend"
+  default     = "alb-fe"
+}
+
+variable "alb_main_name" {
+  description = "Application Load Balancer name for Main"
+  default     = "alb-main"
+}
+
+variable "tg_jenkins_name" {
+  description = "Target Group name for Jenkins"
+  default     = "tg-jenkins"
+}
+
+variable "tg_fe_name" {
+  description = "Target Group name for Frontend"
+  default     = "tg-fe"
+}
+
+variable "tg_be_name" {
+  description = "Target Group name for Backend"
+  default     = "tg-be"
+}
+
+variable "tg_ai1_name" {
+  description = "Target Group name for AI1"
+  default     = "tg-ai1"
+}
+
+variable "tg_ai2_name" {
+  description = "Target Group name for AI2"
+  default     = "tg-ai2"
+}
+
+variable "be_path_patterns" {
+  description = "Path patterns for Backend"
+  type        = list(string)
+  default     = ["/api/*"]
+}
+
+variable "ai1_path_patterns" {
+  description = "Path patterns for AI1"
+  type        = list(string)
+  default     = ["/ai1/*"]
+}
+
+variable "ai2_path_patterns" {
+  description = "Path patterns for AI2"
+  type        = list(string)
+  default     = ["/ai2/*"]
+}
+
+variable "target_group_tags" {
+  description = "Tags for Target Group"
+  type        = map(string)
+  default     = {
+    Environment = "dev"
+    ManagedBy   = "terraform"
+  }
+}
+
+
+################################################################################
+# ecs.tf
+################################################################################

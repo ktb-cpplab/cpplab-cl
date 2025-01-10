@@ -11,6 +11,16 @@ module "vpc" {
   nat_security_group_id = module.nat_security_group.security_group_id
 }
 
+module "ecs_cluster" {
+  source       = "./modules/ecs/ecs_cluster"
+  cluster_name = "cpplab"
+  tags = {
+    Environment = "dev"
+    Project     = "ECSProject"
+  }
+}
+
+
 module "jenkins_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.jenkins_ami
