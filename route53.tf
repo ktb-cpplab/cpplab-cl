@@ -1,5 +1,5 @@
 module "route53" {
-  source                  = "../modules/route53"
+  source                  = "./modules/route53"
   domain_name             = "cpplab.store"
   domain_validation_options = module.acm.domain_validation_options
 
