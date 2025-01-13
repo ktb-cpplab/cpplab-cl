@@ -21,7 +21,3 @@ resource "aws_route53_record" "additional_records" {
   ttl     = 300
   records = [each.value.value]
 }
-
-output "zone_id" {
-  value = aws_route53_zone.main.zone_id
-}
