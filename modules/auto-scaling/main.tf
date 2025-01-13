@@ -55,3 +55,23 @@ resource "aws_autoscaling_group" "this" {
     propagate_at_launch = true
   }
 }
+
+resource "aws_autoscaling_lifecycle_hook" "launch_hook" {
+  name                   = "${var.name_prefix}-launch-hook"
+  autoscaling_group_name = aws_autoscaling_group.this.name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  heartbeat_timeout      = var.launch_heartbeat_timeout
+  default_result         = "CONTINUE"
+  notification_target_arn = var.notification_target_arn
+  role_arn               = var.lifecycle_hook_role_arn
+}
+
+resource "aws_autoscaling_lifecycle_hook" "terminate_hook" {
+  name                   = "${var.name_prefix}-terminate-hook"
+  autoscaling_group_name = aws_autoscaling_group.this.name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
+  heartbeat_timeout      = var.terminate_heartbeat_timeout
+  default_result         = "CONTINUE"
+  notification_target_arn = var.notification_target_arn
+  role_arn               = var.lifecycle_hook_role_arn
+}

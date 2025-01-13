@@ -39,7 +39,7 @@ variable "load_balancers" {
 # - secrets
 
 # 나머지 변수들은 그대로 둡니다.
-variable "task_family" {
+variable "task_family_name" {
   description = "ECS 태스크 정의 패밀리 이름"
   type        = string
 }

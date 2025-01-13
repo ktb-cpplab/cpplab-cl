@@ -135,6 +135,18 @@ variable "certificate_arn" {
   default = null
 }
 
+variable "launch_heartbeat_timeout" {
+  description = "Launch Hook Heartbeat Timeout"
+  type        = number
+  default     = 600
+}
+
+variable "terminate_heartbeat_timeout" {
+  description = "Terminate Hook Heartbeat Timeout"
+  type        = number
+  default     = 600
+}
+
 
 ################################################################################
 # alb.tf
@@ -218,5 +230,62 @@ variable "target_group_tags" {
 
 
 ################################################################################
-# ecs.tf
+# parameters.tf
 ################################################################################
+variable "ssm_parameters" {
+  type = map(object({
+    value = string
+    type  = string
+  }))
+  description = "Map of SSM parameters with their values and types"
+}
+
+################################################################################
+# RDS.tf
+################################################################################
+
+variable "db_password" {
+  description = "DB password"
+  type        = string
+}
+
+################################################################################
+# ECS.tf
+################################################################################
+variable "be_task_family_name" {
+  description = "ECS Task Definition Family Name for Backend"
+  default     = "be-task-family/dev"
+}
+
+variable "be_service_name" {
+  description = "ECS Service Name for Backend"
+  default     = "be-service/dev"
+}
+
+variable "ecs_backend_config" {
+  description = "Configuration for backend ECS service"
+  type = object({
+    task_family_name   = string
+    service_name       = string
+    containers         = list(object({
+      name         = string
+      image        = string
+      memory       = number
+      cpu          = number
+      essential    = bool
+      portMappings = list(object({
+        containerPort = number
+        hostPort      = number
+        protocol      = string
+      }))
+      secrets = list(object({
+        name      = string
+        valueFrom = string
+      }))
+    }))
+    load_balancers     = list(object({
+      container_name   = string
+      container_port   = number
+    }))
+  })
+}

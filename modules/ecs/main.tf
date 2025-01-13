@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "this" {
-  family                   = var.task_family
+  family                   = var.task_family_name
   network_mode             = var.network_mode
   requires_compatibilities = ["EC2"]
   execution_role_arn       = var.execution_role_arn

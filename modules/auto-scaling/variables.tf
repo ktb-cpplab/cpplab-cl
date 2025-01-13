@@ -86,3 +86,27 @@ variable "ecs_cluster_name" {
   type        = string
   default = ""
 }
+
+variable "launch_heartbeat_timeout" {
+  description = "The amount of time, in seconds, that can elapse before the lifecycle hook times out."
+  type        = number
+  default     = 3600
+}
+
+variable "notification_target_arn" {
+  description = "The ARN of the notification target that Auto Scaling will use to notify you when an instance is in the transition state."
+  type        = string
+  default = null
+}
+
+variable "lifecycle_hook_role_arn" {
+  description = "The ARN of the IAM role that allows the Auto Scaling group to publish lifecycle notifications to an SNS topic."
+  type        = string
+  default = null
+}
+
+variable "terminate_heartbeat_timeout" {
+  description = "The amount of time, in seconds, that can elapse before the lifecycle hook times out."
+  type        = number
+  default     = 3600
+}

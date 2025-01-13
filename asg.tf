@@ -5,6 +5,8 @@ module "auto_scaling_be" {
   ecs_cluster_name           = module.ecs_cluster.cluster_name
   instance_type              = var.be_instance_type
   associate_public_ip_address = false
+  launch_heartbeat_timeout  = var.launch_heartbeat_timeout
+  terminate_heartbeat_timeout = var.terminate_heartbeat_timeout
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   subnet_ids = module.vpc.private_subnet_ids
   key_name                   = var.key_name

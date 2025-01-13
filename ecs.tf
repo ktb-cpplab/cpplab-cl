@@ -48,7 +48,7 @@ module "ecs_ai" {
   source                     = "./modules/ecs"
   cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
-  task_family                = "ai-task-family"
+  task_family_name           = "ai-task-family"
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
@@ -154,7 +154,7 @@ module "ecs_ai" {
 
   load_balancers = [
     {
-      target_group_arn = module.target_group["ai2"].target_group_arn
+      target_group_arn = module.target_group["ai1"].target_group_arn
       container_name   = "ai-container-1"
       container_port   = 5000
     },
@@ -171,14 +171,14 @@ module "ecs_ai" {
 # BE 파트
 module "ecs_be" {
   source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
+  cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
-  task_family                = "be-task-family"
+  task_family_name           = var.be_task_family_name
   desired_count              = 1
   subnet_ids                 = module.vpc.private_subnet_ids
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   target_group_arn           = module.target_group["Backend"].target_group_arn
-  service_name               = "my-be-service"
+  service_name               = var.be_service_name
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
   part_capacity_provider     = module.be_capacity_provider.name  # BE 서비스의 Capacity Provider
 
@@ -235,9 +235,9 @@ module "ecs_be" {
 # FE 파트
 module "ecs_fe" {
   source                     = "./modules/ecs"
-  cluster_id                 = aws_ecs_cluster.this.id
+  cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
-  task_family                = "fe-task-family"
+  task_family_name           = "fe-task-family"
   desired_count              = 1
   subnet_ids                 = module.vpc.public_subnet_ids
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
