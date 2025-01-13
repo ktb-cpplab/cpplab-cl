@@ -146,3 +146,222 @@ ssm_parameters = {
 ################################################################################
 
 db_password = "y1LLxJeCTKaUEvfHbHMi"
+
+################################################################################
+#  ECS.tf
+################################################################################
+ecs_frontend_config = {
+  task_family_name   = "dev-fe-task-family"
+  service_name       = "dev-fe-service"
+  desired_count      = 1
+  containers = [
+    {
+      name      = "fe-container"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/fe:latest"
+      memory    = 1024
+      cpu       = 1024
+      essential = true
+      portMappings = [{
+        containerPort = 3000
+        hostPort      = 3000
+        protocol      = "tcp"
+      }]
+      secrets = []
+    }
+  ]
+  capacity_provider = {
+    name = "fe-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size = 1
+    minimum_scaling_step_size = 1
+    scaling_status = "value"
+    target_capacity = 100
+  }
+}
+
+ecs_backend_config = {
+  task_family_name   = "dev-be-task-family"
+  service_name       = "dev-be-service"
+  desired_count      = 1
+  containers = [
+    {
+      name      = "be-container"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/be:latest"
+      memory    = 1536
+      cpu       = 1536
+      essential = true
+      portMappings = [{
+        containerPort = 8080
+        hostPort      = 8080
+        protocol      = "tcp"
+      }]
+      secrets = [
+        { name = "DB_URL",
+          valueFrom = "arn:aws:ssm:ap-northeast-2:123456789012:parameter/ecs/dev/DB_URL" 
+        },
+        { name = "DB_USERNAME"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:123456789012:parameter/ecs/dev/DB_USERNAME" 
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/JWT_SECRET"
+        },
+        {
+          name      = "KAKAO_CLIENT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/KAKAO_CLIENT_SECRET"
+        },
+        {
+          name      = "NAVER_CLIENT_SECRET"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/NAVER_CLIENT_SECRET"
+        }
+      ]
+    }
+  ]
+  capacity_provider = {
+    name = "be-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size = 1
+    minimum_scaling_step_size = 1
+    scaling_status = "value"
+    target_capacity = 100
+  }
+}
+
+ecs_ai_config = {
+  task_family_name   = "dev-ai-task-family"
+  service_name       = "dev-ai-service"
+  desired_count      = 1
+  containers = [
+    {
+      name      = "ai-container-peter"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:recommend-latest"
+      memory    = 1024
+      cpu       = 1024
+      essential = true
+      portMappings = [{
+        containerPort = 5000
+        hostPort      = 5000
+        protocol      = "tcp"
+      }]
+      secrets = [
+        {
+          name      = "DB_URL"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_url"
+        },
+        {
+          name      = "MODEL_PATH"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/model/path"
+        },
+        {
+          name      = "DB_NAME"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/db/name"
+        },
+        {
+          name      = "DB_USER"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_USERNAME"
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/spring/DB_PASSWORD"
+        },
+        {
+          name      = "DB_PORT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/db_port"
+        },
+        {
+          name      = "MECAB_PATH"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/mecab/path"
+        }
+      ]
+    },
+    {
+      name      = "ai-container-simon"
+      image     = "891612581533.dkr.ecr.ap-northeast-2.amazonaws.com/cpplab/ai:project-latest"
+      memory    = 512
+      cpu       = 512
+      essential = true
+      portMappings = [{
+        containerPort = 5001
+        hostPort      = 5001
+        protocol      = "tcp"
+      }]
+      secrets = [
+        {
+          name      = "HUGGINGFACEHUB_API_TOKEN"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/HUGGINGFACEHUB_API_TOKEN"
+        },
+        {
+          name      = "LANGCHAIN_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_API_KEY"
+        },
+        {
+          name      = "LANGCHAIN_ENDPOINT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_ENDPOINT"
+        },
+        {
+          name      = "LANGCHAIN_PROJECT"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_PROJECT"
+        },
+        {
+          name      = "LANGCHAIN_TRACING_V2"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/LANGCHAIN_TRACING_V2"
+        },
+        {
+          name      = "OPENAI_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/OPENAI_API_KEY"
+        },
+        {
+          name      = "UPSTAGE_API_KEY"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/UPSTAGE_API_KEY"
+        },
+        {
+          name      = "CLOUD_DB"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/CLOUD_DB"
+        },
+        {
+          name      = "CLOUD_REDIS"
+          valueFrom = "arn:aws:ssm:ap-northeast-2:891612581533:parameter/ecs/ai/CLOUD_REDIS"
+        }
+      ]
+    }
+  ]
+  capacity_provider = {
+    name = "ai-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size = 1
+    minimum_scaling_step_size = 1
+    scaling_status = "value"
+    target_capacity = 100
+  }
+}
+
+capacity_providers = {
+  ai = {
+    name                           = "ai-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size      = 1
+    minimum_scaling_step_size      = 1
+    scaling_status                 = "ENABLED"
+    target_capacity                = 100
+  }
+  be = {
+    name                           = "be-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size      = 1
+    minimum_scaling_step_size      = 1
+    scaling_status                 = "ENABLED"
+    target_capacity                = 100
+  }
+  fe = {
+    name                           = "fe-capacity-provider"
+    managed_termination_protection = "DISABLED"
+    maximum_scaling_step_size      = 1
+    minimum_scaling_step_size      = 1
+    scaling_status                 = "ENABLED"
+    target_capacity                = 100
+  }
+}

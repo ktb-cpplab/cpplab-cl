@@ -252,21 +252,12 @@ variable "db_password" {
 ################################################################################
 # ECS.tf
 ################################################################################
-variable "be_task_family_name" {
-  description = "ECS Task Definition Family Name for Backend"
-  default     = "be-task-family/dev"
-}
-
-variable "be_service_name" {
-  description = "ECS Service Name for Backend"
-  default     = "be-service/dev"
-}
-
-variable "ecs_backend_config" {
-  description = "Configuration for backend ECS service"
+variable "ecs_frontend_config" {
+  description = "Configuration for frontend ECS service"
   type = object({
     task_family_name   = string
     service_name       = string
+    desired_count      = number
     containers         = list(object({
       name         = string
       image        = string
@@ -283,9 +274,92 @@ variable "ecs_backend_config" {
         valueFrom = string
       }))
     }))
-    load_balancers     = list(object({
-      container_name   = string
-      container_port   = number
-    }))
+    capacity_provider = object({
+      name                          = string
+      managed_termination_protection = string
+      maximum_scaling_step_size     = number
+      minimum_scaling_step_size     = number
+      scaling_status                = string
+      target_capacity               = number
+    })
   })
 }
+
+variable "ecs_backend_config" {
+  description = "Configuration for backend ECS service"
+  type = object({
+    task_family_name   = string
+    service_name       = string
+    desired_count      = number
+    containers         = list(object({
+      name         = string
+      image        = string
+      memory       = number
+      cpu          = number
+      essential    = bool
+      portMappings = list(object({
+        containerPort = number
+        hostPort      = number
+        protocol      = string
+      }))
+      secrets = list(object({
+        name      = string
+        valueFrom = string
+      }))
+    }))
+    capacity_provider = object({
+      name                          = string
+      managed_termination_protection = string
+      maximum_scaling_step_size     = number
+      minimum_scaling_step_size     = number
+      scaling_status                = string
+      target_capacity               = number
+    })
+  })
+}
+
+variable "ecs_ai_config" {
+  description = "Configuration for ai ECS service"
+  type = object({
+    task_family_name   = string
+    service_name       = string
+    desired_count      = number
+    containers         = list(object({
+      name         = string
+      image        = string
+      memory       = number
+      cpu          = number
+      essential    = bool
+      portMappings = list(object({
+        containerPort = number
+        hostPort      = number
+        protocol      = string
+      }))
+      secrets = list(object({
+        name      = string
+        valueFrom = string
+      }))
+    }))
+    capacity_provider = object({
+      name                          = string
+      managed_termination_protection = string
+      maximum_scaling_step_size     = number
+      minimum_scaling_step_size     = number
+      scaling_status                = string
+      target_capacity               = number
+    })
+  })
+}
+
+variable "capacity_providers" {
+  description = "Configuration for all ECS capacity providers"
+  type = map(object({
+    name                           = string
+    managed_termination_protection = string
+    maximum_scaling_step_size      = number
+    minimum_scaling_step_size      = number
+    scaling_status                 = string
+    target_capacity                = number
+  }))
+}
+

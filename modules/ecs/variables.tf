@@ -64,11 +64,6 @@ variable "security_group_ids" {
   type        = list(string)
 }
 
-variable "target_group_arn" {
-  description = "Application Load Balancer와 연관된 타겟 그룹 ARN"
-  type        = string
-}
-
 variable "cluster_id" {
   description = "ECS 클러스터 ID"
   type        = string
