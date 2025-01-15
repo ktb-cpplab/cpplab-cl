@@ -1,6 +1,7 @@
 variable "domain_name" {
   description = "ACM에 등록할 도메인 이름"
   type        = string
+  default     = "cpplab.store"
 }
 
 variable "environment" {

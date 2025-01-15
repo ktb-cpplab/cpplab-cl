@@ -42,7 +42,7 @@ module "ecs_ai" {
   security_group_ids         = [module.auto_scaling_ai_security_group.security_group_id]
   service_name               = var.ecs_ai_config.service_name
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
-  part_capacity_provider     = module.capacity_providers[ai].name  # AI 서비스의 Capacity Provider
+  part_capacity_provider     = module.capacity_providers["ai"].name  # AI 서비스의 Capacity Provider
 
   containers = var.ecs_ai_config.containers
 
@@ -72,7 +72,7 @@ module "ecs_be" {
   security_group_ids         = [module.auto_scaling_be_security_group.security_group_id]
   service_name               = var.ecs_backend_config.service_name
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
-  part_capacity_provider     = module.capacity_providers[be].name  # BE 서비스의 Capacity Provider
+  part_capacity_provider     = module.capacity_providers["be"].name  # BE 서비스의 Capacity Provider
   containers = var.ecs_backend_config.containers
   load_balancers = [
     {
@@ -94,7 +94,7 @@ module "ecs_fe" {
   security_group_ids         = [module.auto_scaling_fe_security_group.security_group_id]
   service_name               = var.ecs_frontend_config.service_name
   execution_role_arn         = module.ecs_execution_role.iam_role_arn
-  part_capacity_provider     = module.capacity_providers[fe].name  # FE 서비스의 Capacity Provider
+  part_capacity_provider     = module.capacity_providers["fe"].name  # FE 서비스의 Capacity Provider
 
   containers = var.ecs_frontend_config.containers
   load_balancers = [
