@@ -34,6 +34,13 @@ module "jenkins_instance" {
   tags                 = merge(var.tags, { Name = "Jenkins" })
 }
 
+# Jenkins Target Group Attachment
+resource "aws_lb_target_group_attachment" "jenkins_target" {
+  target_group_arn = module.target_group["jenkins"].target_group_arn
+  target_id        = module.jenkins_instance.instance_id
+  port             = 8080
+}
+
 module "redis_instance" {
   source               = "./modules/ec2-instance"
   ami                  = var.redis_ami
