@@ -1,5 +1,5 @@
 module "route53_zones" {
-  source  = "terraform-aws-modules/route53/aws//modules/zones"
+  source  = "./modules/route53/zones"
   version = "~> 4.0"
 
   zones = {
@@ -18,7 +18,7 @@ module "route53_zones" {
 }
 
 module "route53_records" {
-  source  = "terraform-aws-modules/route53/aws//modules/records"
+  source  = "./modules/route53/records"
   version = "~> 4.0"
 
   zone_name = "cpplab.store"
