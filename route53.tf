@@ -1,23 +1,57 @@
-module "route53" {
-  source                  = "./modules/route53"
-  domain_name             = "cpplab.store"
-  domain_validation_options = module.acm.domain_validation_options
+module "route53_zones" {
+  source  = "terraform-aws-modules/route53/aws//modules/zones"
+  version = "~> 4.0"
 
-  additional_records = [
+  zones = {
+    "cpplab.store" = {
+      comment = "Hosted zone for cpplab.store"
+      tags = {
+        Project = "ECSProject"
+        Env     = "dev"
+      }
+    }
+  }
+
+  tags = {
+    ManagedBy = "Terraform"
+  }
+}
+
+module "route53_records" {
+  source  = "terraform-aws-modules/route53/aws//modules/records"
+  version = "~> 4.0"
+
+  zone_name = "cpplab.store"
+
+  records = [
+    # 프론트엔드 ALB 연결
     {
       name  = "fe.cpplab.store"
       type  = "A"
-      value = module.alb["Frontend"].alb_dns_name # 프론트엔드 ALB DNS 이름
+      alias = {
+        name    = module.alb["Frontend"].alb_dns_name
+        zone_id = module.alb["Frontend"].alb_zone_id
+      }
     },
+    # www.cpplab.store 연결
     {
       name  = "www.cpplab.store"
       type  = "A"
-      value = module.alb["Frontend"].alb_dns_name # www를 프론트엔드 ALB로 연결
+      alias = {
+        name    = module.alb["Frontend"].alb_dns_name
+        zone_id = module.alb["Frontend"].alb_zone_id
+      }
     },
+    # 백엔드 ALB 연결
     {
       name  = "be.cpplab.store"
       type  = "A"
-      value = module.alb["main"].alb_dns_name # 백엔드 ALB DNS 이름
+      alias = {
+        name    = module.alb["main"].alb_dns_name
+        zone_id = module.alb["main"].alb_zone_id
+      }
     }
   ]
+
+  depends_on = [module.route53_zones]
 }
