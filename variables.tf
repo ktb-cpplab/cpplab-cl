@@ -129,12 +129,6 @@ variable "asg_min_size" {
 }
 
 
-variable "certificate_arn" {
-  description = "certificate_arn"
-  type = string
-  default = null
-}
-
 variable "launch_heartbeat_timeout" {
   description = "Launch Hook Heartbeat Timeout"
   type        = number

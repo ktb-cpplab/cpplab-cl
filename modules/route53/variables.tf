@@ -22,3 +22,12 @@ variable "additional_records" {
   }))
   default = []
 }
+
+variable "alb" {
+  description = "ALB 모듈 출력 값을 포함하는 맵"
+  type = map(object({
+    alb_dns_name = string
+    alb_zone_id  = string
+    alb_arn      = string
+  }))
+}

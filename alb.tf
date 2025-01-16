@@ -77,7 +77,7 @@ module "listener" {
       port              = 80
       protocol          = "HTTP"
       target_group_arn  = module.target_group["jenkins"].target_group_arn
-      certificate_arn   = null
+      certificate_arn   = module.acm.certificate_arn
       redirect          = false
     }
     fe_http_redirect = {
@@ -85,7 +85,7 @@ module "listener" {
       port              = 80
       protocol          = "HTTP"
       target_group_arn  = null
-      certificate_arn   = null
+      certificate_arn   = module.acm.certificate_arn
       redirect          = true
     }
     fe_https = {
@@ -93,7 +93,7 @@ module "listener" {
       port              = 443
       protocol          = "HTTPS"
       target_group_arn  = module.target_group["Frontend"].target_group_arn
-      certificate_arn   = var.certificate_arn
+      certificate_arn   = module.acm.certificate_arn
       redirect          = false
     }
     be_http_redirect = {
@@ -101,7 +101,7 @@ module "listener" {
       port              = 80
       protocol          = "HTTP"
       target_group_arn  = null
-      certificate_arn   = null
+      certificate_arn   = module.acm.certificate_arn
       redirect          = true
     }
     be_https = {
@@ -109,9 +109,10 @@ module "listener" {
       port              = 443
       protocol          = "HTTPS"
       target_group_arn  = module.target_group["Backend"].target_group_arn
-      certificate_arn   = var.certificate_arn
+      certificate_arn   = module.acm.certificate_arn
       redirect          = false
     }
+    
   }
 
   load_balancer_arn = each.value.load_balancer_arn
