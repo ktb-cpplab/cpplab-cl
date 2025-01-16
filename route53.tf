@@ -1,6 +1,5 @@
 module "route53_zones" {
   source  = "./modules/route53/zones"
-  version = "~> 4.0"
 
   zones = {
     "cpplab.store" = {
@@ -19,7 +18,6 @@ module "route53_zones" {
 
 module "route53_records" {
   source  = "./modules/route53/records"
-  version = "~> 4.0"
 
   zone_name = "cpplab.store"
 
