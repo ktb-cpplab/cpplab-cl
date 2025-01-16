@@ -77,8 +77,8 @@ module "ecs_be" {
   load_balancers = [
     {
       target_group_arn = module.target_group["Backend"].target_group_arn
-      container_name   = var.ecs_backend_config.container_name
-      container_port   = var.ecs_backend_config.container_port
+      container_name   = var.ecs_backend_config.containers[0].name
+      container_port   = var.ecs_backend_config.containers[0].portMappings[0].containerPort
     }
   ]
   depends_on = [ module.ecs_execution_role ]
@@ -100,8 +100,8 @@ module "ecs_fe" {
   load_balancers = [
     {
       target_group_arn = module.target_group["Frontend"].target_group_arn
-      container_name   = var.ecs_frontend_config.container_name
-      container_port   = var.ecs_frontend_config.container_port
+      container_name   = var.ecs_frontend_config.containers[0].name
+      container_port   = var.ecs_frontend_config.containers[0].portMappings[0].containerPort
     }
   ]
   depends_on = [ module.ecs_execution_role ]

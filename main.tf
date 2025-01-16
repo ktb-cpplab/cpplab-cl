@@ -13,7 +13,7 @@ module "vpc" {
 
 module "ecs_cluster" {
   source       = "./modules/ecs/ecs_cluster"
-  cluster_name = "cpplab/dev"
+  cluster_name = "cpplab-dev"
   tags = {
     Environment = "dev"
     Project     = "ECSProject"
