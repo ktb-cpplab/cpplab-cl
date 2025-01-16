@@ -24,7 +24,7 @@ module "route53_records" {
   records = [
     # 프론트엔드 ALB 연결
     {
-      name  = "fe.cpplab.store"
+      name  = "fe"
       type  = "A"
       alias = {
         name    = module.alb["Frontend"].alb_dns_name
@@ -33,7 +33,15 @@ module "route53_records" {
     },
     # www.cpplab.store 연결
     {
-      name  = "www.cpplab.store"
+      name  = "www"
+      type  = "A"
+      alias = {
+        name    = module.alb["Frontend"].alb_dns_name
+        zone_id = module.alb["Frontend"].alb_zone_id
+      }
+    },
+    {
+      name  = ""
       type  = "A"
       alias = {
         name    = module.alb["Frontend"].alb_dns_name
@@ -42,7 +50,7 @@ module "route53_records" {
     },
     # 백엔드 ALB 연결
     {
-      name  = "be.cpplab.store"
+      name  = "be"
       type  = "A"
       alias = {
         name    = module.alb["main"].alb_dns_name

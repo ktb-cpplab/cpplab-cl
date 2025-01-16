@@ -29,8 +29,4 @@ resource "aws_db_instance" "this" {
   
   # Tags
   tags = var.tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
