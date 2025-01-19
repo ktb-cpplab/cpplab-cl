@@ -141,10 +141,25 @@ variable "terminate_heartbeat_timeout" {
 }
 
 ################################################################################
+# security-group
+################################################# 
+# 관리자 IP 목록
+variable "admin_cidr_blocks" {
+  description = "List of CIDR blocks for admin access"
+  type        = list(string)
+  default     = []
+}
+
+################################################################################
 # acm.tf
 ################################################################################
+variable "existing_zone_id" {
+  description = "The ID of the existing Route 53 Hosted Zone"
+  type        = string
+}
+
 variable "domain_name" {
-  description = "ACM에 등록할 도메인 이름"
+  description = "The domain name for ACM validation"
   type        = string
 }
 
