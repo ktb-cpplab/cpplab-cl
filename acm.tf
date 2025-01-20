@@ -12,7 +12,7 @@ module "acm" {
   validation_method         = "DNS"
 
   tags = {
-    Environment = "dev"
+    Environment = var.environment
     Project     = "ECSProject"
   }
 }

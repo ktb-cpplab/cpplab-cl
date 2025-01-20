@@ -3,7 +3,7 @@ module "multiple_ssm_parameters" {
   version = "1.1.2"
 
   for_each       = var.ssm_parameters
-  name           = each.key
+  name           = "/dev${each.key}"
   value          = each.value.value
   type           = each.value.type
   secure_type    = each.value.type == "SecureString" ? true : false

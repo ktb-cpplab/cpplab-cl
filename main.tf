@@ -6,7 +6,7 @@ module "vpc" {
   private_subnet_cidr = var.private_subnet_cidr
   availability_zones  = var.availability_zones
   key_name            = var.key_name
-  tags = merge(var.tags, { Environment = "dev" })
+  tags = merge(var.tags, { Environment = var.environment })
 
   nat_security_group_id = module.nat_security_group.security_group_id
 }
@@ -15,7 +15,7 @@ module "ecs_cluster" {
   source       = "./modules/ecs/ecs_cluster"
   cluster_name = "cpplab-dev"
   tags = {
-    Environment = "dev"
+    Environment = var.environment
     Project     = "ECSProject"
   }
 }

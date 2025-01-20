@@ -46,7 +46,7 @@
 # Monitor 보안 그룹 모듈
 module "mt_security_group" {
   source        = "./modules/security-group"
-  name          = "mt-security-group"
+  name          = "${var.environment}-mt-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -85,12 +85,16 @@ module "mt_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # Redis 보안 그룹 모듈
 module "redis_security_group" {
   source        = "./modules/security-group"
-  name          = "redis-security-group"
+  name          = "${var.environment}-redis-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -112,12 +116,16 @@ module "redis_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # Jenkins 보안 그룹 모듈
 module "jenkins_security_group" {
   source        = "./modules/security-group"
-  name          = "jenkins-security-group"
+  name          = "${var.environment}-jenkins-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -136,12 +144,16 @@ module "jenkins_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # ALB 보안 그룹 모듈
 module "fe_alb_security_group" {
   source        = "./modules/security-group"
-  name          = "fe-alb-security-group"
+  name          = "${var.environment}-fe-alb-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -166,11 +178,15 @@ module "fe_alb_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 module "be_alb_security_group" {
   source        = "./modules/security-group"
-  name          = "be-alb-security-group"
+  name          = "${var.environment}-be-alb-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -195,12 +211,16 @@ module "be_alb_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # Auto Scaling BE 보안 그룹 모듈
 module "auto_scaling_be_security_group" {
   source        = "./modules/security-group"
-  name          = "auto-scaling-be-security-group"
+  name          = "${var.environment}-auto-scaling-be-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -239,12 +259,16 @@ module "auto_scaling_be_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # Auto Scaling FE 보안 그룹 모듈
 module "auto_scaling_fe_security_group" {
   source        = "./modules/security-group"
-  name          = "auto-scaling-fe-security-group"
+  name          = "${var.environment}-auto-scaling-fe-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -285,12 +309,16 @@ module "auto_scaling_fe_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # Auto Scaling AI 보안 그룹 모듈
 module "auto_scaling_ai_security_group" {
   source        = "./modules/security-group"
-  name          = "auto_scaling_ai_security_group"
+  name          = "${var.environment}-auto_scaling_ai_security_group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -328,12 +356,16 @@ module "auto_scaling_ai_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 # NAT 인스턴스 보안 그룹 모듈
 module "nat_security_group" {
   source        = "./modules/security-group"
-  name          = "nat-instance-sg"
+  name          = "${var.environment}-nat-instance-sg"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -362,6 +394,10 @@ module "nat_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }
 
 
@@ -369,7 +405,7 @@ module "nat_security_group" {
 
 module "postgres_security_group" {
   source        = "./modules/security-group"
-  name          = "postgres_security_group"
+  name          = "${var.environment}-postgres_security_group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
@@ -392,4 +428,8 @@ module "postgres_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
 }

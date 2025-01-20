@@ -20,7 +20,7 @@ module "ssm_iam_role" {
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
   tags = {
-    Environment = "dev"
+    Environment = var.environment
   }
   create_instance_profile = true
 }
@@ -54,7 +54,7 @@ module "ecs_execution_role" {
     }
   ]
   tags = {
-    Environment = "prod"
+    Environment = var.environment
   }
 }
 
@@ -104,7 +104,7 @@ module "mt_role" {
     }
   ]
   tags = {
-    Environment = "dev"
+    Environment = var.environment
   }
   create_instance_profile = true
 }

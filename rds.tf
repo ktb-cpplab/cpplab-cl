@@ -13,7 +13,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 
   tags = {
     Name = "rds-subnet-group"
-    Environment = "production"
+    Environment = var.environment
   }
 }
 
@@ -50,7 +50,7 @@ module "rds_postgres" {
   # 태그 설정
   tags = {
     Name = "postgres-rds-instance"
-    Environment = "production"
+    Environment = var.environment
   }
 }
 
@@ -59,7 +59,7 @@ module "rds_postgres" {
 module "spring_DB_URL" {
   source  = "terraform-aws-modules/ssm-parameter/aws"
 
-  name        = "/ecs/spring/DB_URL"
+  name        = "/${var.environment}/ecs/spring/DB_URL"
   value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"
   secure_type = true
 }
@@ -67,7 +67,7 @@ module "spring_DB_URL" {
 module "ai_DB_URL" {
   source  = "terraform-aws-modules/ssm-parameter/aws"
 
-  name        = "/ecs/ai/db_url"
+  name        = "/${var.environment}/ecs/ai/db_url"
   value       = replace(module.rds_postgres.rds_endpoint, ":5432", "")
   secure_type = true
 }
@@ -75,7 +75,7 @@ module "ai_DB_URL" {
 module "CLOUD_DB" {
   source  = "terraform-aws-modules/ssm-parameter/aws"
 
-  name        = "/ecs/ai/CLOUD_DB"
+  name        = "/${var.environment}/ecs/ai/CLOUD_DB"
   value       = "postgresql+psycopg://cpplab11:y1LLxJeCTKaUEvfHbHMi@${module.rds_postgres.rds_endpoint}/cpplab_rag"
   secure_type = true
 }

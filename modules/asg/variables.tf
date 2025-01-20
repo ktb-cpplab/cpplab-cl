@@ -1,6 +1,18 @@
-variable "name_prefix" {
-  description = "Prefix for the launch template and ASG"
+variable "name" {
+  description = "Name used across the resources created"
   type        = string
+}
+
+variable "use_name_prefix" {
+  description = "Determines whether to use `name` as is or create a unique name beginning with the `name` as the prefix"
+  type        = bool
+  default     = true
+}
+
+variable "user_data" {
+  description = "The Base64-encoded user data to provide when launching the instance"
+  type        = string
+  default     = null
 }
 
 variable "instance_ami" {
@@ -52,21 +64,36 @@ variable "target_group_arns" {
   description = "List of Target Group ARNs"
   type        = list(string)
 }
+variable "tags" {
+  type = map(string)
+  default = {
+    Name        = "example-asg"
+    Environment = "dev"
+    ManagedBy   = "terraform"
+  }
+}
 
-variable "tag_name" {
-  description = "Name tag for instances"
+variable "tag_specifications" {
+  description = "The tags to apply to the resources during launch"
+  type        = list(any)
+  default     = []
+}
+
+variable "launch_template_name" {
+  description = "Name for the launch template"
   type        = string
+}
+
+variable "launch_template_use_name_prefix" {
+  description = "Determines whether to use `launch_template_name` as is or create a unique name beginning with the `launch_template_name` as the prefix"
+  type        = bool
+  default     = true
 }
 
 variable "iam_instance_profile" {
   description = "IAM Instance Profile for EC2 instances (optional)"
   type        = string
   default     = null  # 기본값을 null로 설정
-}
-
-variable "ecs_instance_type" {
-  description = "ECS 인스턴스 타입을 지정 (fe, be, ai 등)"
-  type        = string
 }
 
 variable "health_check_grace_period" {
@@ -79,12 +106,6 @@ variable "protect_from_scale_in" {
   description = "Boolean to enable/disable instance protection from scale-in for the Auto Scaling group."
   type        = bool
   default     = false 
-}
-
-variable "ecs_cluster_name" {
-  description = "ECS 클러스터 이름"
-  type        = string
-  default = ""
 }
 
 variable "launch_heartbeat_timeout" {
@@ -109,4 +130,30 @@ variable "terminate_heartbeat_timeout" {
   description = "The amount of time, in seconds, that can elapse before the lifecycle hook times out."
   type        = number
   default     = 3600
+}
+
+# Spot 관련 변수 추가
+variable "on_demand_base_capacity" {
+  description = "온디맨드 인스턴스의 최소 용량"
+  default     = 0
+}
+
+variable "on_demand_percentage_above_base_capacity" {
+  description = "온디맨드 인스턴스의 비율"
+  default     = 0
+}
+
+variable "spot_allocation_strategy" {
+  description = "Spot 할당 전략 (capacity-optimized 또는 lowest-price)"
+  default     = "capacity-optimized"
+}
+
+variable "spot_instance_pools" {
+  description = "Spot Instance 풀의 개수"
+  default     = 2
+}
+
+variable "spot_max_price" {
+  description = "Spot 최대 가격 (USD)"
+  default     = null
 }

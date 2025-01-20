@@ -1,3 +1,27 @@
+variable "environment" {
+  description = "Environment (e.g. dev, prod)"
+  default     = "dev"
+}
+
+variable "project" {
+  description = "Project name"
+  default     = "cpplab"
+}
+
+################################################################################
+# tag
+################################################################################
+variable "common_tags" {
+  description = "Common tags applied to all resources"
+  type = map(string)
+  default = {
+    Project     = "myproject"
+    Environment = "dev"
+    ManagedBy   = "Terraform"
+  }
+}
+
+
 variable "region" {
   description = "AWS region"
   default     = "ap-northeast-2"
@@ -106,10 +130,13 @@ variable "tags" {
   default     = {
     Environment = "dev"
     ManagedBy   = "terraform"
+    Project     = "cpplab"
   }
 }
 
-# Auto Scaling 그룹 변수
+################################################################################
+# ASG.tf
+################################################################################
 variable "asg_desired_capacity" {
   description = "Auto Scaling 그룹의 원하는 인스턴스 수"
   type        = number
@@ -127,18 +154,28 @@ variable "asg_min_size" {
   type        = number
   default     = 1
 }
-
-variable "launch_heartbeat_timeout" {
-  description = "Launch Hook Heartbeat Timeout"
+variable "on_demand_base_capacity" {
+  description = "On-Demand Capacity"
   type        = number
-  default     = 600
+  default     = 0
+}
+variable "on_demand_percentage_above_base_capacity" {
+  description = "On-Demand Percentage Above Base Capacity"
+  type        = number
+  default     = 0
+  
+}
+variable "spot_allocation_strategy" {
+  description = "Spot Allocation Strategy"
+  type        = string
+  default     = "capacity-optimized"
+}
+variable "spot_instance_pools" {
+  description = "Spot Instance Pools"
+  type        = number
+  default     = 2
 }
 
-variable "terminate_heartbeat_timeout" {
-  description = "Terminate Hook Heartbeat Timeout"
-  type        = number
-  default     = 600
-}
 
 ################################################################################
 # security-group

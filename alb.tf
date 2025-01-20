@@ -3,19 +3,19 @@ module "alb" {
   source  = "./modules/alb"
   for_each = {
     jenkins = {
-      name              = var.alb_jenkins_name
+      name              = "${var.environment}-${var.alb_jenkins_name}"
       internal          = false
       security_group_ids = [module.fe_alb_security_group.security_group_id]
       subnet_ids        = module.vpc.public_subnet_ids
     }
     Frontend = {
-      name              = var.alb_fe_name
+      name              = "${var.environment}-${var.alb_fe_name}"
       internal          = false
       security_group_ids = [module.fe_alb_security_group.security_group_id]
       subnet_ids        = module.vpc.public_subnet_ids
     }
     main = {
-      name              = var.alb_main_name
+      name              = "${var.environment}-${var.alb_main_name}"
       internal          = true
       security_group_ids = [module.be_alb_security_group.security_group_id]
       subnet_ids        = module.vpc.private_subnet_ids
