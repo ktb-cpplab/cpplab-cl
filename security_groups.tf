@@ -221,7 +221,7 @@ module "auto_scaling_be_security_group" {
       from_port       = 8080
       to_port         = 8080
       protocol        = "tcp"
-      security_groups = [module.mt_security_group.security_group_id]
+      security_groups = [module.mt_security_group.security_group_id,module.be_alb_security_group.security_group_id]
     },
     {
       # Prometheus가 Node Exporter 또는 cAdvisor 메트릭 수집 (포트 9100~9323)

@@ -30,7 +30,7 @@ module "rds_postgres" {
   # Database 정보
   db_name                    = "cpplab"            # 데이터베이스 이름
   username                   = "cpplab11"                 # 데이터베이스 사용자 이름
-  password                   = "db_password"      # 데이터베이스 비밀번호
+  password                   = var.db_password      # 데이터베이스 비밀번호
   parameter_group_name       = "default.postgres16"    # 파라미터 그룹 이름 (필요에 따라 설정)
 
   # 네트워크 및 보안 설정
@@ -76,7 +76,7 @@ module "CLOUD_DB" {
   source  = "terraform-aws-modules/ssm-parameter/aws"
 
   name        = "/ecs/ai/CLOUD_DB"
-  value       = "postgresql+psycopg://cpplab11:y1LLxJeCTKaUEvfHbHMi@${module.rds_postgres.rds_endpoint}:5432/cpplab_rag"
+  value       = "postgresql+psycopg://cpplab11:y1LLxJeCTKaUEvfHbHMi@${module.rds_postgres.rds_endpoint}/cpplab_rag"
   secure_type = true
 }
 
