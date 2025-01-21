@@ -204,15 +204,6 @@ variable "domain_name" {
 # alb.tf
 ################################################################################
 
-variable "alb_tags" {
-  description = "Tags for Application Load Balancer"
-  type        = map(string)
-  default     = {
-    Environment = "dev"
-    ManagedBy   = "terraform"
-  }
-}
-
 variable "alb_jenkins_name" {
   description = "Application Load Balancer name for Jenkins"
   default     = "alb-jenkins"
@@ -269,15 +260,6 @@ variable "ai2_path_patterns" {
   description = "Path patterns for AI2"
   type        = list(string)
   default     = ["/ai2/*"]
-}
-
-variable "target_group_tags" {
-  description = "Tags for Target Group"
-  type        = map(string)
-  default     = {
-    Environment = "dev"
-    ManagedBy   = "terraform"
-  }
 }
 
 

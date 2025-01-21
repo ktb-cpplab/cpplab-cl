@@ -1,8 +1,8 @@
 locals {
   auto_scaling_group_arns = {
-    ai = module.auto_scaling_ai.asg_arn
-    be = module.auto_scaling_be.asg_arn
-    fe = module.auto_scaling_fe.asg_arn
+    ai = module.auto_scaling["be"].asg_arn
+    be = module.auto_scaling["fe"].asg_arn
+    fe = module.auto_scaling["ai"].asg_arn
   }
 }
 
@@ -58,7 +58,7 @@ module "ecs_ai" {
       container_port   = 5001
     }
   ]
-  depends_on = [ module.ecs_execution_role ]
+  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
 }
 
 # BE 파트
@@ -81,7 +81,7 @@ module "ecs_be" {
       container_port   = var.ecs_backend_config.containers[0].portMappings[0].containerPort
     }
   ]
-  depends_on = [ module.ecs_execution_role ]
+  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
 }
 # FE 파트
 module "ecs_fe" {
@@ -104,5 +104,5 @@ module "ecs_fe" {
       container_port   = var.ecs_frontend_config.containers[0].portMappings[0].containerPort
     }
   ]
-  depends_on = [ module.ecs_execution_role ]
+  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
 }

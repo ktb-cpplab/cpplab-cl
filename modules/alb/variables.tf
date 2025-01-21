@@ -1,3 +1,9 @@
+variable "access_logs" {
+  description = "Map containing access logging configuration for load balancer"
+  type        = map(string)
+  default     = {}
+}
+
 variable "name" {
   type = string
 }

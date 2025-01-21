@@ -1,10 +1,3 @@
-#RDS
-#postgres parameter db password
-# module "db_password" {
-#   source          = "./modules/read-param"
-#   parameter_name  = "/ecs/spring/DB_PASSWORD"  # Parameter Store의 경로
-# }
-#rds db subnet group
 # 프라이빗 서브넷 그룹 생성
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds-subnet-group"
@@ -53,41 +46,3 @@ module "rds_postgres" {
     Environment = var.environment
   }
 }
-
-# RDS 엔드포인트를 Parameter Store에 갱신
-
-module "spring_DB_URL" {
-  source  = "terraform-aws-modules/ssm-parameter/aws"
-
-  name        = "/${var.environment}/ecs/spring/DB_URL"
-  value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"
-  secure_type = true
-}
-
-module "ai_DB_URL" {
-  source  = "terraform-aws-modules/ssm-parameter/aws"
-
-  name        = "/${var.environment}/ecs/ai/db_url"
-  value       = replace(module.rds_postgres.rds_endpoint, ":5432", "")
-  secure_type = true
-}
-
-module "CLOUD_DB" {
-  source  = "terraform-aws-modules/ssm-parameter/aws"
-
-  name        = "/${var.environment}/ecs/ai/CLOUD_DB"
-  value       = "postgresql+psycopg://cpplab11:y1LLxJeCTKaUEvfHbHMi@${module.rds_postgres.rds_endpoint}/cpplab_rag"
-  secure_type = true
-}
-
-# module "update_rds_endpoint" {
-#   source          = "./modules/write-param"           # 모듈 경로
-#   parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
-#   new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"  # RDS 엔드포인트 값을 문자열로 연결
-# }
-
-# module "update_ai_db_url" {
-#   source          = "./modules/write-param"           # 모듈 경로
-#   parameter_name  = "/ecs/ai/db_url"                  # Parameter Store의 경로
-#   new_value       = replace(module.rds_postgres.rds_endpoint, ":5432", "")
-# }

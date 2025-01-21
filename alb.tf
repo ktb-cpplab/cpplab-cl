@@ -13,12 +13,20 @@ module "alb" {
       internal          = false
       security_group_ids = [module.fe_alb_security_group.security_group_id]
       subnet_ids        = module.vpc.public_subnet_ids
+      access_logs = {
+        bucket = module.s3_bucket_for_logs.s3_bucket_id
+        prefix = "access-logs"
+      }
     }
     main = {
       name              = "${var.environment}-${var.alb_main_name}"
       internal          = true
       security_group_ids = [module.be_alb_security_group.security_group_id]
       subnet_ids        = module.vpc.private_subnet_ids
+      access_logs = {
+        bucket = module.s3_bucket_for_logs.s3_bucket_id
+        prefix = "access-logs"
+      }
     }
   }
 
@@ -26,7 +34,8 @@ module "alb" {
   internal          = each.value.internal
   security_group_ids = each.value.security_group_ids
   subnet_ids        = each.value.subnet_ids
-  tags              = var.alb_tags
+  access_logs = try(each.value.access_logs, null)
+  tags              = var.common_tags
 }
 
 
@@ -38,34 +47,47 @@ module "target_group" {
       name             = var.tg_jenkins_name
       port             = 8080
       health_check_path = "/health"
+      deregistration_delay = 60
     }
     Frontend = {
       name             = var.tg_fe_name
       port             = 3000
       health_check_path = "/"
+      deregistration_delay = 60
     }
     Backend = {
       name             = var.tg_be_name
       port             = 8080
       health_check_path = "/api/v1/health"
+      deregistration_delay = 60
     }
     ai1 = {
       name             = var.tg_ai1_name
       port             = 5000
       health_check_path = "/ai/health"
+      deregistration_delay = 90
     }
     ai2 = {
       name             = var.tg_ai2_name
       port             = 5001
       health_check_path = "/ai/health"
+      deregistration_delay = 90
     }
   }
 
-  name             = each.value.name
+  name = "${var.project}-${var.environment}-${each.value.name}"
   port             = each.value.port
   vpc_id           = module.vpc.vpc_id
+  healthy_threshold = 3
+  unhealthy_threshold = 2
+  interval = 30
+  timeout = 3
   health_check_path = each.value.health_check_path
-  tags             = var.target_group_tags
+  deregistration_delay = each.value.deregistration_delay
+  tags = merge(var.common_tags, {
+    Role = "TargetGroup",
+    Service = each.value.name
+  })
 }
 
 module "listener" {
@@ -120,6 +142,7 @@ module "listener" {
   target_group_arn  = each.value.target_group_arn
   certificate_arn   = each.value.certificate_arn
   redirect          = each.value.redirect
+  tags              = var.common_tags
 }
 
 module "listener_rule" {
@@ -150,4 +173,21 @@ module "listener_rule" {
   priority         = each.value.priority
   path_patterns    = each.value.path_patterns
   target_group_arn = each.value.target_group_arn
+  tags = var.common_tags
+}
+
+module "s3_bucket_for_logs" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+
+  bucket = "${var.environment}-${var.project}-logs"
+  acl    = "log-delivery-write"
+
+  # Allow deletion of non-empty bucket
+  force_destroy = true
+
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  attach_elb_log_delivery_policy = true  # Required for ALB logs
+  attach_lb_log_delivery_policy  = true  # Required for ALB/NLB logs
 }

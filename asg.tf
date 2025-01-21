@@ -47,7 +47,6 @@ locals {
   }
 }
 
-# 반복적인 모듈 호출
 module "auto_scaling" {
   source = "./modules/asg"
 
@@ -80,7 +79,7 @@ module "auto_scaling" {
       resource_type = "instance"
       tags = merge(
         var.common_tags,
-        { Role = each.value.role_tag, Service = each.value.name }
+        { Role = each.value.role_tag, Service = each.value.name, Name = each.value.name }
       )
     }
   ]
