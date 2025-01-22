@@ -2,7 +2,7 @@
 
 # # ELK 보안 그룹 모듈
 # module "elk_security_group" {
-#   source        = "./modules/security-group"
+#   source        = "../modules/security-group"
 #   name          = "elk-security-group"
 #   vpc_id        = module.vpc.vpc_id
 
@@ -45,7 +45,7 @@
 
 # Monitor 보안 그룹 모듈
 module "mt_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-mt-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -93,7 +93,7 @@ module "mt_security_group" {
 
 # Redis 보안 그룹 모듈
 module "redis_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-redis-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -124,7 +124,7 @@ module "redis_security_group" {
 
 # Jenkins 보안 그룹 모듈
 module "jenkins_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-jenkins-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -152,7 +152,7 @@ module "jenkins_security_group" {
 
 # ALB 보안 그룹 모듈
 module "fe_alb_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-fe-alb-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -185,7 +185,7 @@ module "fe_alb_security_group" {
 }
 
 module "be_alb_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-be-alb-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -219,7 +219,7 @@ module "be_alb_security_group" {
 
 # Auto Scaling BE 보안 그룹 모듈
 module "auto_scaling_be_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-auto-scaling-be-security-group"
   vpc_id        = module.vpc.vpc_id
 
@@ -267,20 +267,18 @@ module "auto_scaling_be_security_group" {
 
 # Auto Scaling FE 보안 그룹 모듈
 module "auto_scaling_fe_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-auto-scaling-fe-security-group"
   vpc_id        = module.vpc.vpc_id
 
   ingress_rules = [
     {
-      # 배포 환경 (Production Mode)
       from_port       = 80
       to_port         = 80
       protocol        = "tcp"
       security_groups = [module.fe_alb_security_group.security_group_id]
     },
     {
-      # 개발 환경 (Development Mode)
       from_port       = 3000
       to_port         = 3000
       protocol        = "tcp"
@@ -317,7 +315,7 @@ module "auto_scaling_fe_security_group" {
 
 # Auto Scaling AI 보안 그룹 모듈
 module "auto_scaling_ai_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-auto_scaling_ai_security_group"
   vpc_id        = module.vpc.vpc_id
 
@@ -364,7 +362,7 @@ module "auto_scaling_ai_security_group" {
 
 # NAT 인스턴스 보안 그룹 모듈
 module "nat_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-nat-instance-sg"
   vpc_id        = module.vpc.vpc_id
 
@@ -404,7 +402,7 @@ module "nat_security_group" {
 #PostgreSQL 보안그룹
 
 module "postgres_security_group" {
-  source        = "./modules/security-group"
+  source        = "../modules/security-group"
   name          = "${var.environment}-postgres_security_group"
   vpc_id        = module.vpc.vpc_id
 

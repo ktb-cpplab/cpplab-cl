@@ -1,6 +1,6 @@
 # ALB 모듈 호출 (Jenkins, FE, BE)
 module "alb" {
-  source  = "./modules/alb"
+  source  = "../modules/alb"
   for_each = {
     jenkins = {
       name              = "${var.environment}-${var.alb_jenkins_name}"
@@ -40,7 +40,7 @@ module "alb" {
 
 
 module "target_group" {
-  source = "./modules/target_group"
+  source = "../modules/target_group"
 
   for_each = {
     jenkins = {
@@ -91,7 +91,7 @@ module "target_group" {
 }
 
 module "listener" {
-  source = "./modules/listener"
+  source = "../modules/listener"
 
   for_each = {
     jenkins_http = {
@@ -146,7 +146,7 @@ module "listener" {
 }
 
 module "listener_rule" {
-  source = "./modules/listener_rule"
+  source = "../modules/listener_rule"
 
   for_each = {
     be = {

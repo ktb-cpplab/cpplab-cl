@@ -1,14 +1,14 @@
 locals {
   auto_scaling_group_arns = {
-    ai = module.auto_scaling["be"].asg_arn
-    be = module.auto_scaling["fe"].asg_arn
-    fe = module.auto_scaling["ai"].asg_arn
+    ai = module.auto_scaling["ai"].asg_arn
+    be = module.auto_scaling["be"].asg_arn
+    fe = module.auto_scaling["fe"].asg_arn
   }
 }
 
 
 module "capacity_providers" {
-  source = "./modules/ecs/capacity_provider"
+  source = "../modules/ecs/capacity_provider"
 
   for_each = var.capacity_providers
 
@@ -33,7 +33,7 @@ resource "aws_ecs_cluster_capacity_providers" "cluster_providers" {
 # ECS 모듈 호출
 # AI 파트
 module "ecs_ai" {
-  source                     = "./modules/ecs"
+  source                     = "../modules/ecs"
   cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
   task_family_name           = var.ecs_ai_config.task_family_name
@@ -63,7 +63,7 @@ module "ecs_ai" {
 
 # BE 파트
 module "ecs_be" {
-  source                     = "./modules/ecs"
+  source                     = "../modules/ecs"
   cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
   task_family_name           = var.ecs_backend_config.task_family_name
@@ -85,7 +85,7 @@ module "ecs_be" {
 }
 # FE 파트
 module "ecs_fe" {
-  source                     = "./modules/ecs"
+  source                     = "../modules/ecs"
   cluster_id                 = module.ecs_cluster.cluster_id
   cluster_name               = module.ecs_cluster.cluster_name
   task_family_name           = var.ecs_frontend_config.task_family_name

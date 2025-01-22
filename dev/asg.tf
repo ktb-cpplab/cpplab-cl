@@ -48,7 +48,7 @@ locals {
 }
 
 module "auto_scaling" {
-  source = "./modules/asg"
+  source = "../modules/asg"
 
   for_each = local.common_settings
 
@@ -58,7 +58,7 @@ module "auto_scaling" {
   max_size                   = var.asg_max_size
   min_size                   = var.asg_min_size
   target_group_arns          = each.value.target_group_arns
-  on_demand_base_capacity    = var.asg_desired_capacity
+  on_demand_base_capacity    = var.on_demand_base_capacity
   on_demand_percentage_above_base_capacity = var.on_demand_percentage_above_base_capacity
   spot_allocation_strategy   = var.spot_allocation_strategy
   spot_instance_pools        = var.spot_instance_pools

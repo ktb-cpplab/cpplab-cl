@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "./modules/vpc"
+  source = "../modules/vpc"
 
   vpc_cidr            = var.vpc_cidr
   public_subnet_cidr  = var.public_subnet_cidr
@@ -12,7 +12,7 @@ module "vpc" {
 }
 
 module "ecs_cluster" {
-  source       = "./modules/ecs/ecs_cluster"
+  source       = "../modules/ecs/ecs_cluster"
   cluster_name = "cpplab-dev"
   tags = {
     Environment = var.environment
@@ -22,7 +22,7 @@ module "ecs_cluster" {
 
 
 module "jenkins_instance" {
-  source               = "./modules/ec2-instance"
+  source               = "../modules/ec2-instance"
   ami                  = var.jenkins_ami
   instance_type        = var.jenkins_instance_type
   key_name             = var.key_name
@@ -42,7 +42,7 @@ resource "aws_lb_target_group_attachment" "jenkins_target" {
 }
 
 module "redis_instance" {
-  source               = "./modules/ec2-instance"
+  source               = "../modules/ec2-instance"
   ami                  = var.redis_ami
   instance_type        = var.instance_type
   key_name             = var.key_name
@@ -54,7 +54,7 @@ module "redis_instance" {
 }
 
 module "Monitor_instance" {
-  source               = "./modules/ec2-instance"
+  source               = "../modules/ec2-instance"
   ami                  = var.mt_ami
   instance_type        = var.mt_instance_type
   key_name             = var.key_name

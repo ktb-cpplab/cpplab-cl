@@ -1,5 +1,5 @@
 module "ecs_asg_iam_role" {
-  source = "./modules/iam-role"
+  source = "../modules/iam-role"
 
   role_name = "ecs-asg-role"
 
@@ -19,7 +19,7 @@ module "ecs_asg_iam_role" {
 
   # 관리형 정책
   policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerServiceforEC2Role",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
@@ -30,7 +30,7 @@ module "ecs_asg_iam_role" {
 }
 
 module "jenkins_iam_role" {
-  source = "./modules/iam-role"
+  source = "../modules/iam-role"
 
   role_name = "jenkins-iam-role"
 
@@ -59,7 +59,7 @@ module "jenkins_iam_role" {
 }
 
 module "redis_iam_role" {
-  source = "./modules/iam-role"
+  source = "../modules/iam-role"
 
   role_name = "redis-iam-role"
 
@@ -85,7 +85,7 @@ module "redis_iam_role" {
 }
 
 module "monitor_iam_role" {
-  source = "./modules/iam-role"
+  source = "../modules/iam-role"
 
   role_name = "monitor-iam-role"
 
@@ -116,7 +116,7 @@ module "monitor_iam_role" {
 
 
 module "ecs_execution_role" {
-  source             = "./modules/iam-role"
+  source             = "../modules/iam-role"
   role_name          = "ecs_execution_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -149,7 +149,7 @@ module "ecs_execution_role" {
 }
 
 # module "ssm_iam_role" {
-#   source             = "./modules/iam-role"
+#   source             = "../modules/iam-role"
 #   role_name          = "ssm-ec2-role"
 #   assume_role_policy = jsonencode({
 #     Version = "2012-10-17",
@@ -176,7 +176,7 @@ module "ecs_execution_role" {
 # }
 
 # module "mt_role" {
-#   source             = "./modules/iam-role"
+#   source             = "../modules/iam-role"
 #   role_name          = "mt-role"
 #   assume_role_policy = jsonencode({
 #     Version = "2012-10-17",

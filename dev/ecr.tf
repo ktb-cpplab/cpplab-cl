@@ -1,5 +1,5 @@
 module "ecr" {
-  source = "./modules/ecr"
+  source = "../modules/ecr"
 
   name = "cpplab-fe/dev"
 
@@ -12,7 +12,7 @@ module "ecr" {
       "description": "Expire images older than 60 days",
       "selection": {
         "tagStatus": "tagged",
-        "tagPrefixList": ["prod"],
+        "tagPrefixList": ["dev"],
         "countType": "sinceImagePushed",
         "countUnit": "days",
         "countNumber": 60

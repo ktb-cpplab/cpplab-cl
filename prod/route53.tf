@@ -1,6 +1,6 @@
 # Route 53 레코드 업데이트
 module "route53_records" {
-  source  = "./modules/route53/records"
+  source  = "../modules/route53/records"
 
   # 기존 Hosted Zone ID 전달
   zone_id = var.existing_zone_id

@@ -1,5 +1,5 @@
 module "acm" {
-  source  = "./modules/acm"
+  source  = "../modules/acm"
 
   # 기존 ACM 인증서를 참조
   existing_certificate_arn = data.aws_acm_certificate.existing.arn

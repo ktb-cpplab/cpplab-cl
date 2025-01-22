@@ -12,7 +12,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 
 #postgres
 module "rds_postgres" {
-  source                     = "./modules/rds"
+  source                     = "../modules/rds"
   
   # RDS 기본 설정
   allocated_storage          = 20                      # 기본 스토리지 (GB 단위)
