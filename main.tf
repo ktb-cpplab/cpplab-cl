@@ -29,7 +29,7 @@ module "jenkins_instance" {
   security_group_id    = module.jenkins_security_group.security_group_id
   subnet_id            = module.vpc.private_subnet_ids[0]
   instance_name        = "Jenkins"
-  iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  iam_instance_profile = module.jenkins_iam_role.instance_profile_name
   root_volume_size     = 30
   tags                 = merge(var.tags, { Name = "Jenkins" })
 }
@@ -49,7 +49,7 @@ module "redis_instance" {
   security_group_id    = module.redis_security_group.security_group_id
   subnet_id            = module.vpc.private_subnet_ids[0]
   instance_name        = "Redis-ec2"
-  iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  iam_instance_profile = module.redis_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Redis" })
 }
 
@@ -61,6 +61,6 @@ module "Monitor_instance" {
   security_group_id    = module.mt_security_group.security_group_id
   subnet_id            = module.vpc.public_subnet_ids[0]
   instance_name        = "Monitor-ec2"
-  iam_instance_profile = module.ssm_iam_role.instance_profile_name
+  iam_instance_profile = module.monitor_iam_role.instance_profile_name
   tags                 = merge(var.tags, { Name = "Monitor" })
 }
