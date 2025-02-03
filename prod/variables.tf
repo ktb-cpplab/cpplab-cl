@@ -156,23 +156,23 @@ variable "asg_min_size" {
 variable "on_demand_base_capacity" {
   description = "On-Demand Capacity"
   type        = number
-  default     = 0
+  default     = 1
 }
 variable "on_demand_percentage_above_base_capacity" {
   description = "On-Demand Percentage Above Base Capacity"
   type        = number
-  default     = 0
+  default     = 100
   
 }
 variable "spot_allocation_strategy" {
   description = "Spot Allocation Strategy"
   type        = string
-  default     = "capacity-optimized"
+  default     = null
 }
 variable "spot_instance_pools" {
   description = "Spot Instance Pools"
   type        = number
-  default     = 2
+  default     = null
 }
 
 
