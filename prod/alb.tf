@@ -20,9 +20,9 @@ module "alb" {
     }
     main = {
       name              = "${var.environment}-${var.alb_main_name}"
-      internal          = true
+      internal          = false
       security_group_ids = [module.be_alb_security_group.security_group_id]
-      subnet_ids        = module.vpc.private_subnet_ids
+      subnet_ids        = module.vpc.public_subnet_ids
       access_logs = {
         bucket = module.s3_bucket_for_logs.s3_bucket_id
         prefix = "access-logs"

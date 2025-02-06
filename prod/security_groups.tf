@@ -194,13 +194,13 @@ module "be_alb_security_group" {
       from_port   = 80
       to_port     = 80
       protocol    = "tcp"
-      security_groups = [module.fe_alb_security_group.security_group_id]
+      cidr_blocks = ["0.0.0.0/0"]
     },
     {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
-      security_groups = [module.fe_alb_security_group.security_group_id]
+      cidr_blocks = ["0.0.0.0/0"]
     }
   ]
   egress_rules = [

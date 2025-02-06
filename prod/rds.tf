@@ -1,6 +1,6 @@
 # 프라이빗 서브넷 그룹 생성
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds-subnet-group"
+  name       = "rds-subnet-group-prod"
   description = "RDS subnet group for PostgreSQL database in private subnets"
   subnet_ids = module.vpc.private_subnet_ids  # VPC 모듈의 프라이빗 서브넷 ID 사용
 
