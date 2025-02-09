@@ -167,7 +167,9 @@ variable "on_demand_percentage_above_base_capacity" {
 variable "spot_allocation_strategy" {
   description = "Spot Allocation Strategy"
   type        = string
-  default     = "capacity-optimized"
+  #default     = "capacity-optimized"
+  default     = "lowest-price"
+
 }
 variable "spot_instance_pools" {
   description = "Spot Instance Pools"
@@ -395,4 +397,3 @@ variable "capacity_providers" {
     target_capacity                = number
   }))
 }
-

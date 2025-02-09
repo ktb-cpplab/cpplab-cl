@@ -145,7 +145,9 @@ variable "on_demand_percentage_above_base_capacity" {
 
 variable "spot_allocation_strategy" {
   description = "Spot 할당 전략 (capacity-optimized 또는 lowest-price)"
-  default     = "capacity-optimized"
+  #default     = "capacity-optimized"
+  default     = "lowest-price"
+
 }
 
 variable "spot_instance_pools" {

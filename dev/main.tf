@@ -29,7 +29,7 @@ module "jenkins_instance" {
   security_group_id    = module.jenkins_security_group.security_group_id
   subnet_id            = module.vpc.private_subnet_ids[0]
   instance_name        = "Jenkins"
-  iam_instance_profile = module.jenkins_iam_role.instance_profile_name
+  iam_instance_profile = module.jenkins_iam_role.instance_profile_name 
   root_volume_size     = 30
   tags                 = merge(var.tags, { Name = "Jenkins" })
 }

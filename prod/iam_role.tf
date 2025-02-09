@@ -111,10 +111,6 @@ module "monitor_iam_role" {
   create_instance_profile = true
 }
 
-
-
-
-
 module "ecs_execution_role" {
   source             = "../modules/iam-role"
   role_name          = "ecs_execution_role"

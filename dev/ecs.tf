@@ -58,7 +58,7 @@ module "ecs_ai" {
       container_port   = 5001
     }
   ]
-  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
+  depends_on = [module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB]
 }
 
 # BE 파트
@@ -81,7 +81,7 @@ module "ecs_be" {
       container_port   = var.ecs_backend_config.containers[0].portMappings[0].containerPort
     }
   ]
-  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
+  depends_on = [module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB]
 }
 # FE 파트
 module "ecs_fe" {
@@ -104,5 +104,5 @@ module "ecs_fe" {
       container_port   = var.ecs_frontend_config.containers[0].portMappings[0].containerPort
     }
   ]
-  depends_on = [ module.ecs_execution_role, module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB ]
+  depends_on = [module.multiple_ssm_parameters, module.spring_DB_URL, module.ai_DB_URL, module.CLOUD_DB]
 }
