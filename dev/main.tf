@@ -31,7 +31,7 @@ module "jenkins_instance" {
   instance_name        = "Jenkins"
   iam_instance_profile = module.jenkins_iam_role.instance_profile_name 
   root_volume_size     = 30
-  tags                 = merge(var.tags, { Name = "Jenkins" })
+  tags                 = merge(var.tags, { Name = "dev-Jenkins" })
 }
 
 # Jenkins Target Group Attachment
@@ -50,7 +50,7 @@ module "redis_instance" {
   subnet_id            = module.vpc.private_subnet_ids[0]
   instance_name        = "Redis-ec2"
   iam_instance_profile = module.redis_iam_role.instance_profile_name
-  tags                 = merge(var.tags, { Name = "Redis" })
+  tags                 = merge(var.tags, { Name = "dev-Redis" })
 }
 
 module "Monitor_instance" {
@@ -62,5 +62,17 @@ module "Monitor_instance" {
   subnet_id            = module.vpc.public_subnet_ids[0]
   instance_name        = "Monitor-ec2"
   iam_instance_profile = module.monitor_iam_role.instance_profile_name
-  tags                 = merge(var.tags, { Name = "Monitor" })
+  tags                 = merge(var.tags, { Name = "dev-Monitor" })
+}
+
+resource "aws_instance" "elk_instance" {
+  ami                    = var.elk_ami  # ELK에 필요한 AMI ID
+  instance_type          = var.elk_instance_type
+  key_name               = var.key_name
+  subnet_id              = module.vpc.public_subnet_ids[0]
+  vpc_security_group_ids = [module.elk_security_group.security_group_id]  # ELK 보안 그룹 연결
+  associate_public_ip_address = true
+  iam_instance_profile        = module.elk_iam_role.instance_profile_name
+
+  tags = merge(var.common_tags, { Name = "dev-elk-instance" })
 }

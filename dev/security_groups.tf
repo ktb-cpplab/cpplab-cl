@@ -1,47 +1,45 @@
 # security_groups.tf
 
-# # ELK 보안 그룹 모듈
-# module "elk_security_group" {
-#   source        = "../modules/security-group"
-#   name          = "elk-security-group"
-#   vpc_id        = module.vpc.vpc_id
+# ELK 보안 그룹 모듈
+module "elk_security_group" {
+  source        = "../modules/security-group"
+  name          = "elk-security-group"
+  vpc_id        = module.vpc.vpc_id
 
-#   ingress_rules = [
-#     # Kibana (포트 5601): 관리자 IP만 허용
-#     {
-#       from_port   = 5601
-#       to_port     = 5601
-#       protocol    = "tcp"
-#       cidr_blocks = var.admin_cidr_blocks  # 관리자의 CIDR 블록
-#     },
-#     # Elasticsearch (포트 9200~9300): Kibana 및 내부 통신
-#     {
-#       from_port   = 9200
-#       to_port     = 9300
-#       protocol    = "tcp"
-#       security_groups = [
-#         module.elk_security_group.security_group_id  # 자기 자신과의 통신 (클러스터 간)
-#       ]
-#     }
-#   ]
+  ingress_rules = [
+    # Kibana (포트 5601): 관리자 IP만 허용
+    {
+      from_port   = 5601
+      to_port     = 5601
+      protocol    = "tcp"
+      cidr_blocks = var.admin_cidr_blocks  # 관리자의 CIDR 블록
+    },
+    # Elasticsearch (포트 9200~9300): Kibana 및 내부 통신
+    {
+      from_port   = 9200
+      to_port     = 9300
+      protocol    = "tcp"
+      cidr_blocks = [module.vpc.vpc_cidr_block]
+    }
+  ]
 
-#   egress_rules = [
-#     # S3와 HTTPS 통신 (포트 443)
-#     {
-#       from_port   = 443
-#       to_port     = 443
-#       protocol    = "tcp"
-#       cidr_blocks = ["0.0.0.0/0"]  # AWS S3와 통신
-#     },
-#     # 모든 아웃바운드 트래픽 허용 (옵션)
-#     {
-#       from_port   = 0
-#       to_port     = 0
-#       protocol    = "-1"
-#       cidr_blocks = ["0.0.0.0/0"]
-#     }
-#   ]
-# }
+  egress_rules = [
+    # S3와 HTTPS 통신 (포트 443)
+    {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]  # AWS S3와 통신
+    },
+    # 모든 아웃바운드 트래픽 허용 (옵션)
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+}
 
 # Monitor 보안 그룹 모듈
 module "mt_security_group" {

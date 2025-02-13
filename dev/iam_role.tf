@@ -168,56 +168,30 @@ module "ssm_iam_role" {
   tags = {
     Environment = var.environment
   }
-  create_instance_profile = true
 }
 
-# module "mt_role" {
-#   source             = "../modules/iam-role"
-#   role_name          = "mt-role"
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [{
-#       Action = "sts:AssumeRole",
-#       Effect = "Allow",
-#       Principal = {
-#         Service = "ec2.amazonaws.com"
-#       }
-#     }]
-#   })
-#   policy_arns = [
-#     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-#     "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
-#   ]
-#   inline_policies = [
-#     {
-#       Effect   = "Allow"
-#       Action   = [
-#         "ssmmessages:CreateDataChannel",
-#         "ssmmessages:OpenDataChannel",
-#         "ssmmessages:SendDataChannel",
-#         "ssmmessages:ReceiveDataChannel"
-#       ]
-#       Resource = "*"
-#     },
-#     {
-#       Effect   = "Allow"
-#       Action   = [
-#         "ec2:DescribeInstances",
-#         "ec2:DescribeTags",
-#         "ec2:DescribeRegions"
-#       ]
-#       Resource = "*"
-#     },
-#     {
-#       Effect   = "Allow"
-#       Action   = [
-#         "ec2:DescribeNetworkInterfaces"
-#       ]
-#       Resource = "*"
-#     }
-#   ]
-#   tags = {
-#     Environment = var.environment
-#   }
-#   create_instance_profile = true
-# }
+# IAM Role for ELK
+module "elk_iam_role" {
+  source = "../modules/iam-role"
+  role_name          = "dev_elk-iam-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+  policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  ]
+  tags = {
+    Environment = var.environment
+  }
+}

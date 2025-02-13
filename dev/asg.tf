@@ -71,7 +71,7 @@ module "auto_scaling" {
   associate_public_ip_address = each.value.associate_public_ip
   security_group_ids         = each.value.security_group_ids
   key_name                   = var.key_name
-  iam_instance_profile       = module.ssm_iam_role.instance_profile_name  # prod 환경의 ECS ASG Role
+  iam_instance_profile       = module.ssm_iam_role.instance_profile_name 
 
   # Tagging
   tag_specifications = [

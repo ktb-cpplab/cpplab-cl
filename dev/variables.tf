@@ -62,6 +62,11 @@ variable "mt_instance_type" {
   default     = "t3a.micro"
 }
 
+variable "elk_instance_type" {
+  description = "Default instance type"
+  default     = "t3a.large"
+}
+
 variable "ai_instance_type" {
   description = "Default instance type"
   default     = "t3a.large"
@@ -110,6 +115,11 @@ variable "redis_ami" {
 variable "mt_ami" {
   description = "AMI ID for Monitoring Instance"
   default = "ami-"
+}
+
+variable "elk_ami" {
+  description = "AMI ID for ELK MT"
+  default = "ami-0254bb7f84ee629a8"
 }
 
 variable "security_group_id" { 
