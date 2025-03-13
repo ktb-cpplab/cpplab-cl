@@ -1,25 +1,18 @@
-#RDS
-#postgres parameter db password
-module "db_password" {
-  source          = "./modules/read-param"
-  parameter_name  = "/ecs/spring/DB_PASSWORD"  # Parameter Store의 경로
-}
-#rds db subnet group
 # 프라이빗 서브넷 그룹 생성
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds-subnet-group"
+  name       = "rds-subnet-group-prod"
   description = "RDS subnet group for PostgreSQL database in private subnets"
   subnet_ids = module.vpc.private_subnet_ids  # VPC 모듈의 프라이빗 서브넷 ID 사용
 
   tags = {
     Name = "rds-subnet-group"
-    Environment = "production"
+    Environment = var.environment
   }
 }
 
 #postgres
 module "rds_postgres" {
-  source                     = "./modules/rds"
+  source                     = "../modules/rds"
   
   # RDS 기본 설정
   allocated_storage          = 20                      # 기본 스토리지 (GB 단위)
@@ -30,7 +23,7 @@ module "rds_postgres" {
   # Database 정보
   db_name                    = "cpplab"            # 데이터베이스 이름
   username                   = "cpplab11"                 # 데이터베이스 사용자 이름
-  password                   = module.db_password.value          # 데이터베이스 비밀번호
+  password                   = var.db_password      # 데이터베이스 비밀번호
   parameter_group_name       = "default.postgres16"    # 파라미터 그룹 이름 (필요에 따라 설정)
 
   # 네트워크 및 보안 설정
@@ -50,19 +43,6 @@ module "rds_postgres" {
   # 태그 설정
   tags = {
     Name = "postgres-rds-instance"
-    Environment = "production"
+    Environment = var.environment
   }
-}
-
-# RDS 엔드포인트를 Parameter Store에 갱신
-module "update_rds_endpoint" {
-  source          = "./modules/write-param"           # 모듈 경로
-  parameter_name  = "/ecs/spring/DB_URL"              # Parameter Store의 경로
-  new_value       = "jdbc:postgresql://${module.rds_postgres.rds_endpoint}/postgres"  # RDS 엔드포인트 값을 문자열로 연결
-}
-
-module "update_ai_db_url" {
-  source          = "./modules/write-param"           # 모듈 경로
-  parameter_name  = "/ecs/ai/db_url"                  # Parameter Store의 경로
-  new_value       = replace(module.rds_postgres.rds_endpoint, ":5432", "")
 }

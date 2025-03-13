@@ -12,4 +12,5 @@ resource "aws_lb_listener_rule" "this" {
     type             = "forward"
     target_group_arn = var.target_group_arn
   }
+  tags = var.tags
 }

@@ -1,3 +1,9 @@
+# Local variables for clarity
+locals {
+  has_inline_policies = length(var.inline_policies) > 0
+  has_policy_arns     = length(var.policy_arns) > 0
+}
+
 # IAM Role 생성
 resource "aws_iam_role" "this" {
   name               = var.role_name
@@ -5,37 +11,27 @@ resource "aws_iam_role" "this" {
   tags               = var.tags
 }
 
-# 인라인 정책 생성 (선택적 적용)
-resource "aws_iam_role_policy" "inline_policy" {
-  count = length(var.inline_policies) > 0 ? 1 : 0
-  name  = "${var.role_name}-inline-policy"
-  role  = aws_iam_role.this.name
+# 인라인 정책 (선택적 적용)
+resource "aws_iam_role_policy" "inline_policies" {
+  for_each = { for idx, policy in var.inline_policies : idx => policy }
 
+  name   = "${var.role_name}-inline-policy-${each.key}"
+  role   = aws_iam_role.this.name
   policy = jsonencode({
     Version   = "2012-10-17",
-    Statement = var.inline_policies
+    Statement = each.value
   })
 }
 
 # IAM Role에 관리형 정책 연결
 resource "aws_iam_role_policy_attachment" "policy_attachments" {
-  for_each   = toset(var.policy_arns)
+  for_each = toset(var.policy_arns)
+
   role       = aws_iam_role.this.name
   policy_arn = each.value
 }
 
-resource "aws_iam_role_policy" "inline_policy_attachment" {
-  count = length(var.policy_statements) > 0 ? 1 : 0
-
-  name   = "${var.role_name}-inline-policy"
-  role   = aws_iam_role.this.name
-  policy = jsonencode({
-    Version   = "2012-10-17",
-    Statement = var.policy_statements
-  })
-} 
-
-
+# IAM Instance Profile 생성
 resource "aws_iam_instance_profile" "this" {
   name = "${var.role_name}-instance-profile"
   role = aws_iam_role.this.name

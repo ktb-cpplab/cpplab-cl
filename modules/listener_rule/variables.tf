@@ -13,3 +13,8 @@ variable "path_patterns" {
 variable "target_group_arn" {
   type = string
 }
+
+variable "tags" {
+  description = "Tags to be applied to all resources"
+  type        = map(string)
+}

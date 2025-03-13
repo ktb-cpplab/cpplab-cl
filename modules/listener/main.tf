@@ -3,14 +3,15 @@ resource "aws_lb_listener" "this" {
   port              = var.port
   protocol          = var.protocol
 
+  # Default action 처리
   dynamic "default_action" {
     for_each = var.redirect ? [1] : []
     content {
       type = "redirect"
       redirect {
-        protocol    = "HTTPS"
-        port        = "443"
-        status_code = "HTTP_301"
+        protocol    = var.redirect_protocol    // 유연하게 설정 가능
+        port        = var.redirect_port        // 기본값 "443"
+        status_code = var.redirect_status_code // 기본값 "HTTP_301"
       }
     }
   }
@@ -23,7 +24,9 @@ resource "aws_lb_listener" "this" {
     }
   }
 
-  # HTTPS 리스너일 경우에만 ssl_policy와 certificate_arn 적용
-  ssl_policy      = var.protocol == "HTTPS" && var.certificate_arn != null ? "ELBSecurityPolicy-2016-08" : null
+  # HTTPS 리스너 설정 (ssl_policy와 certificate_arn 유효성 검사)
+  ssl_policy      = (var.protocol == "HTTPS" && var.certificate_arn != null) ? var.ssl_policy : null
   certificate_arn = var.protocol == "HTTPS" ? var.certificate_arn : null
+
+  tags = var.tags
 }

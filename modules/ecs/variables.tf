@@ -39,7 +39,7 @@ variable "load_balancers" {
 # - secrets
 
 # 나머지 변수들은 그대로 둡니다.
-variable "task_family" {
+variable "task_family_name" {
   description = "ECS 태스크 정의 패밀리 이름"
   type        = string
 }
@@ -62,11 +62,6 @@ variable "subnet_ids" {
 variable "security_group_ids" {
   description = "ECS 서비스에 사용할 보안 그룹 ID 리스트"
   type        = list(string)
-}
-
-variable "target_group_arn" {
-  description = "Application Load Balancer와 연관된 타겟 그룹 ARN"
-  type        = string
 }
 
 variable "cluster_id" {
